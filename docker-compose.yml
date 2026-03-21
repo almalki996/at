@@ -1,0 +1,38 @@
+version: "3"
+services:
+  database:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "directus"
+      POSTGRES_PASSWORD: "directus_password"
+      POSTGRES_DB: "directus"
+    volumes:
+      - directus-data:/var/lib/postgresql/data
+
+  directus:
+    image: directus/directus:latest
+    ports:
+      - "8055:8055"
+    depends_on:
+      - database
+    environment:
+      KEY: "b45209ac-dd3c-47fc-b5ba-09cb93c4db52"
+      SECRET: "0fc53cb6-6d6f-4ac6-b2d6-056fb69ea974"
+      DB_CLIENT: "pg"
+      DB_HOST: "database"
+      DB_PORT: "5432"
+      DB_DATABASE: "directus"
+      DB_USER: "directus"
+      DB_PASSWORD: "directus_password"
+      ADMIN_EMAIL: "admin@example.com"
+      ADMIN_PASSWORD: "password"
+      ADMIN_TOKEN: "strategic_plans_super_secure_admin_token"
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: "true"
+      CORS_METHODS: "GET,POST,PATCH,DELETE,OPTIONS"
+      CORS_ALLOWED_HEADERS: "Content-Type,Authorization"
+
+volumes:
+  directus-data:

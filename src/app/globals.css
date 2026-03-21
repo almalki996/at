@@ -1,14 +1,15 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-tajawal);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -22,5 +23,70 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Custom React Datepicker Styles for Sofoit Theme */
+.react-datepicker-wrapper {
+  width: 100%;
+}
+.react-datepicker {
+  @apply font-sans! border! border-slate-200! dark:border-slate-700! rounded-2xl! shadow-2xl! bg-white! dark:bg-slate-900! z-50!;
+}
+.react-datepicker__header {
+  @apply bg-slate-50! dark:bg-slate-800! border-b! border-slate-100! dark:border-slate-700/80! rounded-t-2xl! pt-4! pb-2!;
+}
+.react-datepicker__current-month,
+.react-datepicker-time__header,
+.react-datepicker-year-header {
+  @apply text-slate-800! dark:text-slate-100! font-bold! text-base! mb-2!;
+}
+.react-datepicker__day-name,
+.react-datepicker__day,
+.react-datepicker__time-name {
+  @apply text-slate-600! dark:text-slate-300! w-9! h-9! leading-9! m-0.5! rounded-lg! transition-colors! inline-flex! items-center! justify-center!;
+}
+.react-datepicker__day-name {
+  @apply font-bold! text-xs! text-slate-400! dark:text-slate-500!;
+}
+.react-datepicker__day:hover,
+.react-datepicker__month-text:hover,
+.react-datepicker__quarter-text:hover,
+.react-datepicker__year-text:hover {
+  @apply bg-slate-100! dark:bg-slate-800! text-teal-600! dark:text-teal-400!;
+}
+.react-datepicker__day--selected,
+.react-datepicker__day--in-selecting-range,
+.react-datepicker__day--in-range,
+.react-datepicker__month-text--selected,
+.react-datepicker__quarter-text--selected,
+.react-datepicker__year-text--selected {
+  @apply bg-teal-500! text-white! font-bold! hover:bg-teal-600! hover:text-white!;
+}
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__month-text--keyboard-selected,
+.react-datepicker__quarter-text--keyboard-selected,
+.react-datepicker__year-text--keyboard-selected {
+  @apply bg-teal-50! dark:bg-teal-900/30! text-teal-600! dark:text-teal-400!;
+}
+.react-datepicker__navigation-icon::before {
+  @apply border-slate-400! dark:border-slate-500! border-2! w-2! h-2! top-3! transition-colors!;
+}
+.react-datepicker__navigation:hover *::before {
+  @apply border-teal-500! dark:border-teal-400!;
+}
+.react-datepicker-popper {
+  @apply z-[9999]!;
+}
+.react-datepicker-popper[data-placement^="bottom"] .react-datepicker__triangle {
+  @apply fill-slate-50! dark:fill-slate-800! text-slate-200! dark:text-slate-700! stroke-slate-200! dark:stroke-slate-700!;
+}
+.react-datepicker__month-select,
+.react-datepicker__year-select {
+  @apply bg-white! dark:bg-slate-800! text-slate-800! dark:text-slate-100! border! border-slate-200! dark:border-slate-700! rounded-md! px-2! py-1! text-sm! font-bold! mx-1! cursor-pointer! outline-none! focus:ring-2! focus:ring-teal-500/50! transition-colors! hover:border-teal-400! dark:hover:border-teal-500!;
+}
+.react-datepicker__header__dropdown {
+  @apply flex! items-center! justify-center! gap-1! mb-2!;
+}
+.react-datepicker__current-month {
+  @apply hidden!; /* Hide original label since we have dropdowns now */
 }
