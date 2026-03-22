@@ -32,16 +32,23 @@ export default function SiteSettingsPage() {
         return url.replace(/\/items\/?$/, '').replace(/\/$/, '');
     };
     
-    const token = process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
-    const axiosConfig = {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
+    const getApiToken = () => {
+        const local = typeof window !== "undefined" ? localStorage.getItem("directus_token") : null;
+        return local || process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
+    };
+    
+    const getAxiosConfig = () => {
+        const t = getApiToken();
+        return {
+            headers: t ? { Authorization: `Bearer ${t}` } : {}
+        };
     };
 
     useEffect(() => {
         const fetchSettings = async () => {
             try {
                 const url = `${getBaseUrl()}/items/site_settings`;
-                const res = await axios.get(url, axiosConfig);
+                const res = await axios.get(url, getAxiosConfig());
                 const data = res.data.data;
                 if (data) {
                     reset({
@@ -67,7 +74,7 @@ export default function SiteSettingsPage() {
                 site_name: data.site_name,
                 site_description: data.site_description,
                 logo: data.logo || null
-            }, axiosConfig);
+            }, getAxiosConfig());
             
             showToast("تم تحديث وحفظ إعدادات النظام بنجاح!", "success");
             
@@ -93,10 +100,11 @@ export default function SiteSettingsPage() {
         formData.append("file", file);
 
         try {
+            const t = getApiToken();
             const res = await axios.post(`${getBaseUrl()}/files`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
-                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                    ...(t ? { Authorization: `Bearer ${t}` } : {})
                 }
             });
             
@@ -118,7 +126,7 @@ export default function SiteSettingsPage() {
             <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden transition-colors duration-300">
                 <div className="bg-gradient-to-l from-indigo-50/50 dark:from-indigo-950/20 to-white dark:to-slate-900 px-8 py-8 border-b border-gray-100 dark:border-slate-800">
                     <div className="flex items-center gap-5">
-                        <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/30 text-white">
+                        <div className="w-16 h-16 shrink-0 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/30 text-white">
                             <Settings size={32} />
                         </div>
                         <div>
@@ -163,7 +171,7 @@ export default function SiteSettingsPage() {
                                     <div className="w-32 h-32 rounded-2xl border-2 border-dashed border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 flex flex-col items-center justify-center overflow-hidden shrink-0 group relative">
                                         {watchLogo ? (
                                             <img 
-                                                src={watchLogo.includes("http") ? watchLogo : `${baseUrlStr}/assets/${watchLogo}?access_token=${token}`} 
+                                                src={watchLogo.includes("http") ? watchLogo : `${baseUrlStr}/assets/${watchLogo}?access_token=${getApiToken()}`} 
                                                 alt="Logo Preview" 
                                                 className="w-full h-full object-contain p-2"
                                             />

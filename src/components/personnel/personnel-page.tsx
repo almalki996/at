@@ -144,7 +144,9 @@ export default function PersonnelPage() {
         updateMany({
             resource: "Personnel",
             ids: Array.from(selectedIds),
-            values: { is_active: isActive }
+            values: { is_active: isActive },
+            successNotification: false,
+            errorNotification: false
         }, {
             onSuccess: () => {
                 toast.success(`تم ${isActive ? "تفعيل" : "تعطيل"} الموظفين المحددين بنجاح 🎉`);
@@ -163,6 +165,8 @@ export default function PersonnelPage() {
             resource: "Personnel",
             id: item.id,
             values: { is_active: isActive },
+            successNotification: false,
+            errorNotification: false
         }, {
             onSuccess: () => {
                 toast.success(`تم ${isActive ? "تفعيل" : "إلغاء تفعيل"} الموظف بنجاح`);
@@ -178,7 +182,9 @@ export default function PersonnelPage() {
         
         deleteRecord({
             resource: "Personnel",
-            id: personnelToDelete.id
+            id: personnelToDelete.id,
+            successNotification: false,
+            errorNotification: false
         }, {
             onSuccess: () => {
                 toast.success("تم حذف الموظف بنجاح");
@@ -201,7 +207,9 @@ export default function PersonnelPage() {
         
         deleteMany({
             resource: "Personnel",
-            ids: Array.from(selectedIds)
+            ids: Array.from(selectedIds),
+            successNotification: false,
+            errorNotification: false
         }, {
             onSuccess: () => {
                 toast.success("تم حذف الموظفين المحددين بنجاح");
@@ -219,7 +227,9 @@ export default function PersonnelPage() {
         setIsSubmitting(true);
         deleteRecord({
             resource: "Employee_Assignments",
-            id: assignmentToDelete.id
+            id: assignmentToDelete.id,
+            successNotification: false,
+            errorNotification: false
         }, {
             onSuccess: () => {
                 toast.success("تم حذف التكليف بنجاح");
@@ -236,7 +246,9 @@ export default function PersonnelPage() {
         setIsSubmitting(true);
         deleteRecord({
             resource: "Employee_Qualifications",
-            id: qualificationToDelete.id
+            id: qualificationToDelete.id,
+            successNotification: false,
+            errorNotification: false
         }, {
             onSuccess: () => {
                 toast.success("تم حذف الدورة بنجاح");
@@ -373,24 +385,24 @@ export default function PersonnelPage() {
                     {/* Floating Bulk Actions Bar */}
                     {selectedIds.size > 0 && (
                         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300 pointer-events-none w-full max-w-2xl px-4">
-                            <div className="bg-slate-900 dark:bg-slate-800 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-2.5 flex items-center justify-between pointer-events-auto ring-1 ring-white/10 dark:ring-white/5">
-                                <div className="flex items-center gap-3 pl-4 pr-2">
+                            <div className="bg-slate-900 dark:bg-slate-800 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-2 sm:p-2.5 flex flex-wrap items-center justify-between pointer-events-auto ring-1 ring-white/10 dark:ring-white/5 gap-2">
+                                <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-4 pr-1 sm:pr-2">
                                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold shrink-0">{selectedIds.size}</span>
-                                    <span className="text-sm font-bold text-slate-300 shrink-0">محددة</span>
-                                    <div className="w-px h-6 bg-slate-700/50 mx-2"></div>
+                                    <span className="text-sm font-bold text-slate-300 shrink-0 hidden sm:inline">محددة</span>
+                                    <div className="w-px h-6 bg-slate-700/50 mx-1 sm:mx-2 hidden sm:block"></div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <button onClick={() => handleBulkStatusChange("published")} disabled={isSubmitting} className="px-4 py-2 text-sm font-bold text-emerald-400 hover:bg-emerald-500/10 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2">
-                                        <CheckCircle2 size={16} /> تفعيل
+                                <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                                    <button onClick={() => handleBulkStatusChange("published")} disabled={isSubmitting} className="px-2 sm:px-4 py-2 text-sm font-bold text-emerald-400 hover:bg-emerald-500/10 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-1 sm:gap-2">
+                                        <CheckCircle2 size={16} /> <span className="hidden sm:inline">تفعيل</span>
                                     </button>
-                                    <button onClick={() => handleBulkStatusChange("draft")} disabled={isSubmitting} className="px-4 py-2 text-sm font-bold text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2">
-                                        <LogOut size={16} className="rotate-180" /> تعطيل
+                                    <button onClick={() => handleBulkStatusChange("draft")} disabled={isSubmitting} className="px-2 sm:px-4 py-2 text-sm font-bold text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-1 sm:gap-2">
+                                        <LogOut size={16} className="rotate-180" /> <span className="hidden sm:inline">تعطيل</span>
                                     </button>
                                     <div className="w-px h-6 bg-slate-700/50 mx-1"></div>
-                                    <button onClick={() => setIsBulkDeleteModalOpen(true)} disabled={isSubmitting} className="flex items-center gap-2 px-4 py-2 hover:bg-rose-500/10 text-rose-400 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
-                                        <Trash2 size={16} /> حذف
+                                    <button onClick={() => setIsBulkDeleteModalOpen(true)} disabled={isSubmitting} className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 hover:bg-rose-500/10 text-rose-400 rounded-xl text-sm font-bold transition-colors disabled:opacity-50">
+                                        <Trash2 size={16} /> <span className="hidden sm:inline">حذف</span>
                                     </button>
-                                    <button onClick={() => setSelectedIds(new Set())} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl transition-colors shrink-0 ml-1" title="إلغاء التحديد">
+                                    <button onClick={() => setSelectedIds(new Set())} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl transition-colors shrink-0 sm:ml-1" title="إلغاء التحديد">
                                         <X size={20} />
                                     </button>
                                 </div>

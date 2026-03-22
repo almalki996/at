@@ -60,13 +60,13 @@ export const Header = () => {
                         <h1 className="text-[19px] font-black text-indigo-900 dark:text-indigo-100 tracking-tight">{siteSettings.site_name}</h1>
                     )}
                     {siteSettings.site_description && (
-                        <span className="text-xs text-indigo-500 dark:text-indigo-400 font-bold opacity-80 mt-0.5">{siteSettings.site_description}</span>
+                        <span className="hidden sm:inline text-xs text-indigo-500 dark:text-indigo-400 font-bold opacity-80 mt-0.5">{siteSettings.site_description}</span>
                     )}
                 </div>
             </div>
 
             {/* Live Clock & Theme Toggles widget */}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3 sm:gap-6">
                 <div className="hidden lg:flex items-center gap-5 bg-indigo-50/60 dark:bg-slate-800/50 border border-indigo-100/50 dark:border-slate-700/50 px-5 py-2.5 rounded-2xl shadow-inner transition-colors duration-300">
                     <div className="flex items-center gap-2 text-indigo-700/80 dark:text-indigo-300/80 font-bold text-[13px]">
                         <Clock size={16} className="text-indigo-400 dark:text-indigo-500" />
@@ -92,11 +92,11 @@ export const Header = () => {
 
                     <button 
                         onClick={() => setIsHijri(!isHijri)}
-                        className="flex items-center gap-2.5 bg-white dark:bg-slate-800 border-2 border-indigo-100 dark:border-indigo-900/50 text-indigo-700 dark:text-indigo-300 px-4 py-2.5 rounded-xl hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white dark:hover:text-white hover:border-indigo-600 dark:hover:border-indigo-500 hover:shadow-lg hover:shadow-indigo-600/20 transition-all font-bold text-sm h-11"
+                        className="flex items-center justify-center gap-2 sm:gap-2.5 bg-white dark:bg-slate-800 border-2 border-indigo-100 dark:border-indigo-900/50 text-indigo-700 dark:text-indigo-300 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white dark:hover:text-white hover:border-indigo-600 dark:hover:border-indigo-500 hover:shadow-lg hover:shadow-indigo-600/20 transition-all font-bold text-sm h-11"
                         title="التبديل بين الهجري والميلادي"
                     >
                         <ArrowLeftRight size={15} />
-                        <span>{isHijri ? "إلى الميلادي" : "إلى الهجري"}</span>
+                        <span className="hidden sm:inline">{isHijri ? "إلى الميلادي" : "إلى الهجري"}</span>
                     </button>
                 </div>
             </div>

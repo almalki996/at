@@ -12,8 +12,8 @@ const tajawal = Tajawal({
 });
 
 export const metadata: Metadata = {
-  title: "Strategic Plans Automation",
-  description: "Generated dynamically with Next.js and Refine",
+  title: "نظام إدارة الخطط الاستراتيجية",
+  description: "نظام إدارة الخطط الاستراتيجية",
 };
 
 export default function RootLayout({
@@ -29,10 +29,10 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-              <RefineProvider>{children}</RefineProvider>
-          </ThemeProvider>
-          <Toaster />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <RefineProvider>{children}</RefineProvider>
+        </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );

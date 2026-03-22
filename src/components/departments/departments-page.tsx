@@ -101,6 +101,8 @@ export default function DepartmentsPage() {
     const [keepOpen, setKeepOpen] = useState(false);
     const [itemToEdit, setItemToEdit] = useState<Department | null>(null);
     const [itemToPreview, setItemToPreview] = useState<Department | null>(null);
+    const [itemToDelete, setItemToDelete] = useState<Department | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set());
 
     // --- Queries ---
@@ -209,6 +211,8 @@ export default function DepartmentsPage() {
             resource: "Departments",
             ids: Array.from(selectedIds),
             values: { job_status: status },
+            successNotification: false,
+            errorNotification: false
         }, {
             onSuccess: () => {
                 toast.success(`تم تغيير حالة ${selectedIds.size} وظيفة إلى ${status}`);
@@ -221,9 +225,12 @@ export default function DepartmentsPage() {
     };
 
     const confirmBulkDelete = () => {
+        setIsSubmitting(true);
         deleteMany({
             resource: "Departments",
             ids: Array.from(selectedIds),
+            successNotification: false,
+            errorNotification: false
         }, {
             onSuccess: () => {
                 toast.success(`تم حذف ${selectedIds.size} وظيفة بنجاح`);
@@ -234,7 +241,8 @@ export default function DepartmentsPage() {
             onError: (error) => {
                 toast.error(error.message || "حدث خطأ أثناء الحذف");
                 setIsBulkDeleteModalOpen(false);
-            }
+            },
+            onSettled: () => setIsSubmitting(false)
         });
     };
 
@@ -312,16 +320,29 @@ export default function DepartmentsPage() {
         setIsPreviewOpen(true);
     };
 
-    const handleDelete = (id: string | number) => {
-        if (window.confirm("هل أنت متأكد من حذف هذه الوظيفة؟")) {
-            deleteRecord({ resource: "Departments", id }, {
-                onSuccess: () => {
-                    toast.success("تم الحذف بنجاح");
-                    refetch?.();
-                },
-                onError: (error) => toast.error(error.message || "حدث خطأ أثناء الحذف")
-            });
-        }
+    const handleDelete = (item: Department) => {
+        setItemToDelete(item);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (!itemToDelete) return;
+        setIsSubmitting(true);
+        deleteRecord({ 
+            resource: "Departments", 
+            id: itemToDelete.id,
+            successNotification: false,
+            errorNotification: false
+        }, {
+            onSuccess: () => {
+                toast.success("تم الحذف بنجاح");
+                setIsDeleteModalOpen(false);
+                setItemToDelete(null);
+                refetch?.();
+            },
+            onError: (error) => toast.error(error.message || "حدث خطأ أثناء الحذف"),
+            onSettled: () => setIsSubmitting(false)
+        });
     };
 
     const handleSave = async () => {
@@ -338,6 +359,8 @@ export default function DepartmentsPage() {
                 resource: "Departments",
                 id: itemToEdit.id,
                 values: payload,
+                successNotification: false,
+                errorNotification: false
             }, {
                 onSuccess: () => {
                     toast.success("تم التعديل بنجاح");
@@ -351,6 +374,8 @@ export default function DepartmentsPage() {
             createRecord({
                 resource: "Departments",
                 values: payload,
+                successNotification: false,
+                errorNotification: false
             }, {
                 onSuccess: () => {
                     toast.success("تمت الإضافة بنجاح");
@@ -418,13 +443,13 @@ export default function DepartmentsPage() {
                 </div>
 
                 {/* Bulk Actions Toolbar Overlay */}
-                <div className={`flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-300 absolute inset-0 bg-teal-50/95 dark:bg-teal-900/40 backdrop-blur-sm p-6 ${selectedIds.size > 0 ? 'opacity-100 translate-y-0 relative' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
-                    <div className="flex items-center gap-3 text-teal-800 dark:text-teal-200 font-bold">
-                        <CheckCircle size={24} className="text-teal-600 dark:text-teal-400" />
-                        <span>تم تحديد {selectedIds.size} عناصر</span>
+                <div className={`flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-300 absolute inset-0 bg-teal-50/95 dark:bg-teal-900/40 backdrop-blur-sm p-4 sm:p-6 ${selectedIds.size > 0 ? 'opacity-100 translate-y-0 relative' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+                    <div className="flex items-center gap-3 text-teal-800 dark:text-teal-200 font-bold shrink-0">
+                        <CheckCircle size={24} className="text-teal-600 dark:text-teal-400 hidden sm:block" />
+                        <span>تم تحديد {selectedIds.size}</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 p-1 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-teal-100 dark:border-teal-900/50">
+                    <div className="flex flex-wrap justify-center md:justify-end items-center gap-2 sm:gap-3 w-full md:w-auto">
+                        <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-2 p-1 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-teal-100 dark:border-teal-900/50">
                             <button
                                 onClick={() => handleBulkStatusUpdate("شاغرة")}
                                 className="px-3 py-1.5 text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-800/40 rounded-lg transition-colors"
@@ -467,9 +492,9 @@ export default function DepartmentsPage() {
 
             {/* Table */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden transition-colors duration-200">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto min-h-[400px]">
                     <table className="w-full text-right text-sm">
-                        <thead className="bg-teal-600 text-white font-medium">
+                        <thead className="bg-teal-600 text-white font-medium whitespace-nowrap">
                             <tr>
                                 <th scope="col" className="px-6 py-4 w-12 text-center">
                                     <input 
@@ -578,7 +603,7 @@ export default function DepartmentsPage() {
                                                     <Edit size={16} />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(item.id)}
+                                                    onClick={() => handleDelete(item)}
                                                     className="p-1.5 text-rose-500 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
                                                     title="حذف"
                                                 >
@@ -616,14 +641,56 @@ export default function DepartmentsPage() {
                         <div className="p-4 bg-gray-50 dark:bg-slate-800/50 flex items-center justify-end gap-3 border-t border-gray-100 dark:border-slate-800">
                             <button
                                 onClick={() => setIsBulkDeleteModalOpen(false)}
-                                className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-all shadow-sm border border-gray-200 dark:border-slate-700"
+                                disabled={isSubmitting}
+                                className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-all shadow-sm border border-gray-200 dark:border-slate-700 disabled:opacity-50"
                             >
                                 إلغاء
                             </button>
                             <button
                                 onClick={confirmBulkDelete}
-                                className="px-5 py-2.5 text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all shadow-sm shadow-rose-600/20"
+                                disabled={isSubmitting}
+                                className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all shadow-sm shadow-rose-600/20 disabled:opacity-50"
                             >
+                                {isSubmitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : null}
+                                نعم، احذفها
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Single Item Modal */}
+            {isDeleteModalOpen && itemToDelete && (
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200"
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) setIsDeleteModalOpen(false);
+                    }}
+                >
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+                        <div className="bg-rose-50 dark:bg-rose-900/20 p-6 flex flex-col items-center justify-center text-center">
+                            <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/50 rounded-full flex items-center justify-center mb-4">
+                                <AlertCircle size={32} className="text-rose-600 dark:text-rose-400" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">تأكيد الحذف</h3>
+                            <p className="text-gray-600 dark:text-rose-200/70">
+                                هل أنت متأكد من حذف هذه الوظيفة بشكل نهائي؟ لا يمكن التراجع عن هذا الإجراء.
+                            </p>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-slate-800/50 flex items-center justify-end gap-3 border-t border-gray-100 dark:border-slate-800">
+                            <button
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                disabled={isSubmitting}
+                                className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-all shadow-sm border border-gray-200 dark:border-slate-700 disabled:opacity-50"
+                            >
+                                إلغاء
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                disabled={isSubmitting}
+                                className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all shadow-sm shadow-rose-600/20 disabled:opacity-50"
+                            >
+                                {isSubmitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : null}
                                 نعم، احذفها
                             </button>
                         </div>

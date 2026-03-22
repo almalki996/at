@@ -60,6 +60,8 @@ export const ExtendTerminateAssignmentModal: React.FC<ExtendTerminateAssignmentM
                 resource: "Employee_Assignments",
                 id: assignment.id,
                 values: payload,
+                successNotification: false,
+                errorNotification: false
             }, {
                 onSuccess: () => {
                     toast.success(mode === "extend" ? "تم تمديد التكليف بنجاح" : "تم إنهاء التكليف بنجاح");

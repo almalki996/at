@@ -131,7 +131,7 @@ export const PersonnelEditModal: React.FC<PersonnelEditModalProps> = ({
                 </div>
 
                 <div className="p-6 overflow-y-auto custom-scrollbar bg-gray-50/30 dark:bg-slate-900/50 flex flex-col gap-6">
-                    <div className="flex bg-gray-100 dark:bg-slate-800/50 p-1 rounded-xl w-fit border border-gray-200 dark:border-slate-700">
+                    <div className="flex bg-gray-100 dark:bg-slate-800/50 p-1 rounded-xl w-fit max-w-full overflow-x-auto custom-scrollbar border border-gray-200 dark:border-slate-700">
                         <button
                             onClick={() => setEditTab("general")}
                             className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${editTab === "general" ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200'}`}

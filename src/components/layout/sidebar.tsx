@@ -72,6 +72,17 @@ export const Sidebar = () => {
     const pathname = usePathname() || "";
     const [isCollapsed, setIsCollapsed] = useState(false);
 
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 1024) {
+                setIsCollapsed(true);
+            }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const { query } = useList({
         resource: "menu_items",
         pagination: { current: 1, pageSize: 100 } as any,
@@ -145,7 +156,7 @@ export const Sidebar = () => {
     const baseUrlStr = (process.env.NEXT_PUBLIC_DIRECTUS_URL || "http://127.0.0.1:8055").replace(/\/items\/?$/, '').replace(/\/$/, '');
 
     return (
-        <aside className={`bg-white dark:bg-slate-900 border-l border-gray-200 dark:border-slate-800 h-screen flex flex-col sticky top-0 overflow-y-auto shrink-0 shadow-sm z-20 transition-all duration-300 ${isCollapsed ? 'w-[75px]' : 'w-64'}`}>
+        <aside className={`bg-white dark:bg-slate-900 border-l border-gray-200 dark:border-slate-800 h-screen flex flex-col sticky top-0 overflow-y-auto shrink-0 shadow-sm z-20 transition-all duration-300 ${isCollapsed ? 'w-16 sm:w-[75px]' : 'w-64'}`}>
             <div className={`pt-6 pb-4 flex flex-col items-center justify-center border-b border-gray-100 dark:border-slate-800 bg-gray-50/30 dark:bg-slate-900/50 gap-4 relative min-h-[90px] transition-colors duration-300`}>
                 <button 
                     onClick={() => setIsCollapsed(!isCollapsed)} 
@@ -159,10 +170,10 @@ export const Sidebar = () => {
                     <img 
                         src={`${baseUrlStr}/assets/${siteSettings.logo}?access_token=${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`} 
                         alt="Site Logo" 
-                        className={`object-contain transition-all duration-300 ${isCollapsed ? 'w-10 h-10 drop-shadow-sm rounded-lg mt-2' : 'w-4/5 max-w-[150px] max-h-[100px] drop-shadow-md rounded-2xl'}`} 
+                        className={`object-contain transition-all duration-300 ${isCollapsed ? 'w-8 h-8 sm:w-10 sm:h-10 drop-shadow-sm rounded-lg mt-2' : 'w-4/5 max-w-[150px] max-h-[100px] drop-shadow-md rounded-2xl'}`} 
                     />
                 ) : (
-                    <div className={`bg-indigo-50 dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 flex items-center justify-center shadow-inner transition-all duration-300 ${isCollapsed ? 'w-10 h-10 rounded-xl mt-2' : 'w-24 h-24 rounded-2xl'}`}>
+                    <div className={`bg-indigo-50 dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 flex items-center justify-center shadow-inner transition-all duration-300 ${isCollapsed ? 'w-8 h-8 sm:w-10 sm:h-10 rounded-xl mt-2' : 'w-24 h-24 rounded-2xl'}`}>
                         <Menu className="text-indigo-400 dark:text-indigo-500" size={isCollapsed ? 20 : 40} />
                     </div>
                 )}

@@ -13,4 +13,4 @@ This project uses a Headless CMS approach (Directus + Refine.dev). The ultimate 
 3. **IMPROVE THE ENGINE, DON'T BYPASS IT**: If the dynamic generic components lack a feature (e.g., specific file uploading logic, complex relations M2O/O2M dropdowns), **ENHANCE `GenericForm` and `useDirectusSchema`**. Do not create custom modals just to bypass the lack of functionality in the generic engine.
 4. **COMPONENT REUSABILITY**: Keep UI components small. If a complex page needs to be created, DO NOT put all modal logic in one 800+ line file. Split them into `/hooks`, `/modals`, `/utils` components inside that specific feature folder.
 5. **REACT RULES**: Do not call `setState()` directly synchronously inside `useEffect()` (cascading renders).
-
+6. **AUTHENTICATION & SECURITY**: Authentication is handled via Refine's AuthProvider (`providers/auth-provider.ts`) which manages JWT tokens via Directus (persisted in localStorage). Route protection is explicitly handled using `<Authenticated>` wrappers in Layouts. Do not implement custom route guards or middleware for standard protected resources.
