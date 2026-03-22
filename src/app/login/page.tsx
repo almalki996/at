@@ -2,14 +2,11 @@
 
 import React, { useState } from "react";
 import { useLogin } from "@refinedev/core";
-import { Mail, Lock, LogIn, AlertCircle } from "lucide-react";
+import { Mail, Lock, LogIn } from "lucide-react";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    
-    // Check if there's a token directly passed in the environment (fallback only)
-    const tokenFallback = process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
     
     // useLogin from refine core integrates directly with our custom authProvider
     const { mutate: login, isPending } = useLogin();
@@ -34,16 +31,6 @@ export default function LoginPage() {
                     <h1 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">تسجيل الدخول</h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-2 text-center text-sm font-medium">أدخل بيانات الاعتماد الخاصة بك للوصول إلى النظام</p>
                 </div>
-
-                {tokenFallback && (
-                    <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-3">
-                        <AlertCircle className="text-amber-500 shrink-0 mt-0.5" size={18} />
-                        <p className="text-xs text-amber-700 dark:text-amber-400 font-medium leading-relaxed">
-                            النظام يدعم تجاوز تسجيل الدخول حالياً للمطورين باستخدام Token البيئة التلقائي. 
-                            ولكن يمكنك الدخول بأي حساب لربط هويتك بدقة.
-                        </p>
-                    </div>
-                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2 relative">
@@ -92,7 +79,7 @@ export default function LoginPage() {
                         ) : (
                             <>
                                 <LogIn size={20} className="group-hover:-translate-x-1 transition-transform" />
-                                <span>تسجيل الدخول الدخول</span>
+                                <span>تسجيل الدخول</span>
                             </>
                         )}
                     </button>
