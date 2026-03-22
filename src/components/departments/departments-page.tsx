@@ -19,6 +19,7 @@ import {
     Settings2
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { CustomSelect } from "../generic/custom-select";
 
 interface Department {
     id: string | number;
@@ -30,67 +31,7 @@ interface Department {
     sort_order: number;
 }
 
-const CustomSelect = ({ 
-    options, 
-    value, 
-    onChange, 
-    placeholder, 
-    disabled = false, 
-    renderOption,
-    renderValue
-}: any) => {
-    const [isOpen, setIsOpen] = React.useState(false);
-    const ref = React.useRef<HTMLDivElement>(null);
-    React.useEffect(() => {
-        const handleClick = (e: MouseEvent) => {
-            if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
-        };
-        document.addEventListener("mousedown", handleClick);
-        return () => document.removeEventListener("mousedown", handleClick);
-    }, []);
 
-    const selected = options.find((o: any) => o.value === value) || null;
-
-    return (
-        <div className="relative" ref={ref}>
-            <button
-                type="button"
-                className={`w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border ${isOpen ? 'border-teal-500 ring-4 ring-teal-500/10' : 'border-gray-200 dark:border-slate-700'} rounded-xl text-sm transition-all focus:outline-none ${disabled ? 'opacity-50 cursor-not-allowed bg-gray-50 dark:bg-slate-800/50' : 'hover:border-teal-400 dark:hover:border-teal-600'}`}
-                onClick={() => !disabled && setIsOpen(!isOpen)}
-            >
-                <div className="flex-1 text-right text-gray-700 dark:text-gray-200 truncate">
-                    {selected ? (renderValue ? renderValue(selected) : selected.label) : <span className="text-gray-400 dark:text-slate-500">{placeholder}</span>}
-                </div>
-                <ChevronDown size={18} className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180 text-teal-500' : ''}`} />
-            </button>
-            
-            {isOpen && (
-                <div className="absolute z-[60] w-full mt-2 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl shadow-xl max-h-60 overflow-y-auto py-2 custom-scrollbar animate-in fade-in slide-in-from-top-2">
-                    {options.length === 0 ? (
-                        <div className="px-4 py-3 text-sm text-center text-gray-500 dark:text-slate-400">لا توجد خيارات</div>
-                    ) : (
-                        options.map((opt: any) => (
-                            <button
-                                key={opt.value}
-                                type="button"
-                                className={`w-full text-right px-4 py-2.5 text-sm transition-colors flex items-center justify-between
-                                    ${value === opt.value 
-                                        ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 font-bold' 
-                                        : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/50'}`}
-                                onClick={() => { onChange(opt.value); setIsOpen(false); }}
-                            >
-                                <div className="flex-1 truncate text-right">
-                                    {renderOption ? renderOption(opt) : opt.label}
-                                </div>
-                                {value === opt.value && <Check size={16} className="text-teal-600 dark:text-teal-400 ml-2 shrink-0" />}
-                            </button>
-                        ))
-                    )}
-                </div>
-            )}
-        </div>
-    );
-};
 
 export default function DepartmentsPage() {
     const [searchQuery, setSearchQuery] = useState("");
@@ -465,30 +406,30 @@ export default function DepartmentsPage() {
 
                     <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 w-full xl:w-auto shrink-0">
                         {/* Status Filter */}
-                        <div className="w-full sm:w-36 shrink-0">
-                            <select
+                        <div className="relative w-full sm:w-40 shrink-0 z-30">
+                            <CustomSelect
                                 value={filterStatus}
-                                onChange={(e) => setFilterStatus(e.target.value)}
-                                className="w-full bg-gray-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-900 dark:text-gray-300 text-sm rounded-xl focus:border-teal-500 py-2.5 px-4 outline-none transition-all"
-                            >
-                                <option value="all">الكل (الحالة)</option>
-                                <option value="شاغرة">شاغرة</option>
-                                <option value="مشغولة">مشغولة</option>
-                                <option value="مجمدة">مجمدة</option>
-                            </select>
+                                onChange={(v) => setFilterStatus(v as string)}
+                                options={[
+                                    { value: 'all', label: 'الكل (الحالة)' },
+                                    { value: 'شاغرة', label: 'شاغرة' },
+                                    { value: 'مشغولة', label: 'مشغولة' },
+                                    { value: 'مجمدة', label: 'مجمدة' }
+                                ]}
+                                className="w-full bg-gray-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-900 dark:text-gray-300 text-sm rounded-xl hover:border-teal-400 focus:border-teal-500 py-2.5 px-4 outline-none transition-all flex justify-between items-center"
+                            />
                         </div>
                         {/* Designation Filter */}
-                        <div className="w-full sm:w-44 shrink-0">
-                            <select
+                        <div className="relative w-full sm:w-48 shrink-0 z-20">
+                            <CustomSelect
                                 value={filterDesignation}
-                                onChange={(e) => setFilterDesignation(e.target.value)}
-                                className="w-full bg-gray-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-900 dark:text-gray-300 text-sm rounded-xl focus:border-teal-500 py-2.5 px-4 outline-none transition-all"
-                            >
-                                <option value="all">الكل (الكادر)</option>
-                                {designations.map(d => (
-                                    <option key={d.id} value={d.id}>{d.name || d.id}</option>
-                                ))}
-                            </select>
+                                onChange={(v) => setFilterDesignation(v)}
+                                options={[
+                                    { value: 'all', label: 'الكل (الكادر)' },
+                                    ...designations.map(d => ({ value: d.id, label: d.name || d.id }))
+                                ]}
+                                className="w-full bg-gray-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-900 dark:text-gray-300 text-sm rounded-xl hover:border-teal-400 focus:border-teal-500 py-2.5 px-4 outline-none transition-all flex justify-between items-center"
+                            />
                         </div>
                         {/* Search */}
                         <div className="relative w-full sm:w-56 shrink-0">
