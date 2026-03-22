@@ -5,7 +5,7 @@ import { useList, useUpdate, useDelete } from "@refinedev/core";
 import { useReactToPrint } from "react-to-print";
 import { calculateStats, getArabicWeekName, arabicWeekDays, formatDateOnly, getHijriDate } from "./utils";
 import { CalendarEvent, CalendarWeek, DayType } from "./types";
-import { ArrowRight, Save, X, Edit, Calendar as CalendarIcon, CalendarDays, CheckCircle2, GraduationCap, Tent, Globe, Printer, Trash2 } from "lucide-react";
+import { ArrowRight, Save, X, Edit, Calendar as CalendarIcon, CalendarDays, CheckCircle2, GraduationCap, Tent, Globe, Printer, Trash2, AlertTriangle } from "lucide-react";
 import toast from "react-hot-toast";
 import { CustomSelect } from "../generic/custom-select";
 
@@ -16,6 +16,7 @@ interface ListViewProps {
 export default function ListView({ onBack }: ListViewProps) {
     const [selectedId, setSelectedId] = useState<string | number>("");
     const [isEditing, setIsEditing] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [localData, setLocalData] = useState<CalendarWeek[]>([]);
     const [isActive, setIsActive] = useState(true);
     const contentRef = useRef<HTMLDivElement>(null);
@@ -92,25 +93,24 @@ export default function ListView({ onBack }: ListViewProps) {
         });
     };
 
-    const handleDelete = () => {
+    const confirmDelete = () => {
         if (!selectedCalendar) return;
-        if (window.confirm("هل أنت متأكد من حذف هذا التقويم التدريبي بالكامل؟ لا يمكن التراجع عن هذا الإجراء.")) {
-            setIsSubmitting(true);
-            deleteRecord({
-                resource: "calendar",
-                id: selectedCalendar.id!,
-                successNotification: () => ({ message: "تم حذف التقويم بنجاح", type: "success" })
-            }, {
-                onSuccess: () => {
-                    setIsSubmitting(false);
-                    setSelectedId(""); // Clear selection
-                },
-                onError: (err) => {
-                    setIsSubmitting(false);
-                    toast.error(err?.message || "حدث خطأ أثناء الحذف");
-                }
-            });
-        }
+        setIsDeleteModalOpen(false);
+        setIsSubmitting(true);
+        deleteRecord({
+            resource: "calendar",
+            id: selectedCalendar.id!,
+            successNotification: () => ({ message: "تم حذف التقويم بنجاح", type: "success" })
+        }, {
+            onSuccess: () => {
+                setIsSubmitting(false);
+                setSelectedId(""); // Clear selection
+            },
+            onError: (err) => {
+                setIsSubmitting(false);
+                toast.error(err?.message || "حدث خطأ أثناء الحذف");
+            }
+        });
     };
 
     const toggleDayType = (weekIdx: number, dayIdx: number) => {
@@ -179,7 +179,7 @@ export default function ListView({ onBack }: ListViewProps) {
                             {!isEditing && (
                                 <>
                                     <button 
-                                        onClick={handleDelete}
+                                        onClick={() => setIsDeleteModalOpen(true)}
                                         disabled={isSubmitting}
                                         className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-800/50 text-rose-600 dark:text-rose-400 rounded-xl transition-all border border-rose-200 dark:border-rose-800 disabled:opacity-50"
                                         title="حذف التقويم"
@@ -367,6 +367,39 @@ export default function ListView({ onBack }: ListViewProps) {
                             <p className="text-sm">يرجى تحديد فترة تدريبية من القائمة العلوية لعرض تفاصيل التقويم.</p>
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 z-[9999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-slate-800 w-full max-w-sm p-6 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-200">
+                        <div className="w-16 h-16 bg-rose-50 dark:bg-rose-900/30 rounded-full flex items-center justify-center mb-4 border-8 border-rose-50/50 dark:border-rose-900/10">
+                            <AlertTriangle size={28} className="text-rose-500 flex-shrink-0" />
+                        </div>
+                        <h3 className="text-xl font-black text-gray-800 dark:text-gray-100 mb-2">تأكيد الحذف</h3>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 leading-relaxed">
+                            هل أنت متأكد من رغبتك في حذف التقويم التدريبي 
+                            <span className="font-bold text-gray-700 dark:text-gray-300 mx-1">
+                                "{selectedCalendar?.name || `رقم ${selectedCalendar?.id}`}"
+                            </span> 
+                            نهائياً؟ لا يمكن التراجع عن هذا الإجراء.
+                        </p>
+                        <div className="flex gap-3 w-full">
+                            <button 
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                className="flex-1 px-4 py-2.5 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-200 dark:hover:bg-slate-700 transition"
+                            >
+                                تراجع
+                            </button>
+                            <button 
+                                onClick={confirmDelete}
+                                className="flex-1 px-4 py-2.5 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-600 shadow-md shadow-rose-500/20 transition"
+                            >
+                                نعم، احذف
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
