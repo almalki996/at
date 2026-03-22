@@ -12,6 +12,7 @@ interface PersonnelEditModalProps {
     itemToEdit: any;
     onSuccess: () => void;
     jobs: any[];
+    departmentsList: any[];
     assignmentsList: any[];
     qualificationsList: any[];
     structuresMap: Map<string | number, any>;
@@ -30,6 +31,7 @@ export const PersonnelEditModal: React.FC<PersonnelEditModalProps> = ({
     itemToEdit,
     onSuccess,
     jobs,
+    departmentsList,
     assignmentsList,
     qualificationsList,
     structuresMap,
@@ -159,6 +161,7 @@ export const PersonnelEditModal: React.FC<PersonnelEditModalProps> = ({
                                 setFormData={setFormData} 
                                 jobs={jobs} 
                                 structures={structuresMap ? Array.from(structuresMap.values()) : []}
+                                departments={departmentsList}
                             />
                         )}
 

@@ -10,6 +10,7 @@ interface PersonnelViewModalProps {
     qualificationsList: any[];
     structuresMap: Map<string | number, any>;
     jobsList: any[];
+    departmentsList: any[];
     onPreview: (url: string) => void;
 }
 
@@ -21,6 +22,7 @@ export const PersonnelViewModal: React.FC<PersonnelViewModalProps> = ({
     qualificationsList,
     structuresMap,
     jobsList,
+    departmentsList,
     onPreview
 }) => {
     const [activeTab, setActiveTab] = useState("general");

@@ -3,7 +3,7 @@ import { Check, Paperclip, X } from "lucide-react";
 import { useForm } from "@refinedev/react-hook-form";
 import toast from "react-hot-toast";
 import { uploadFile } from "../utils";
-import { RelationSelect } from "../../generic/relation-select";
+import { CustomSelect } from "../CustomSelect";
 import { DatePickerField } from "../../generic/date-picker";
 
 interface AssignmentModalProps {
@@ -13,6 +13,7 @@ interface AssignmentModalProps {
     personnelId: string | number;
     structures?: any[];
     jobs?: any[];
+    departments?: any[];
     onSuccess: () => void;
 }
 
@@ -21,6 +22,9 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
     onClose, 
     initialData, 
     personnelId, 
+    departments = [],
+    structures = [],
+    jobs = [],
     onSuccess 
 }) => {
     const [file, setFile] = useState<File | null>(null);
@@ -33,6 +37,8 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
         handleSubmit, 
         formState: { errors }, 
         reset,
+        setValue,
+        watch,
         refineCore: { onFinish, formLoading } 
     } = useForm({
         refineCoreProps: {
@@ -112,6 +118,39 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
     if (!isOpen) return null;
     const isSubmitting = formLoading || uploadingState;
 
+    const currentDepId = watch("department_id");
+    const currentJobId = watch("job_id");
+
+    const selectedVacancy = departments.find(d => {
+        const dStructId = typeof d.structure_id === 'object' ? d.structure_id?.id : d.structure_id;
+        const dJobId = typeof d.employee_job === 'object' ? d.employee_job?.id : d.employee_job;
+        return dStructId === currentDepId && dJobId === currentJobId;
+    });
+
+    const vacancyOptions = departments
+        .filter(d => d.job_status === 'شاغرة' || d.id === selectedVacancy?.id)
+        .map(d => {
+            const structName = typeof d.structure_id === 'object' ? d.structure_id?.name : structures.find(s => s.id === d.structure_id)?.name;
+            const jobName = typeof d.employee_job === 'object' ? d.employee_job?.job_title : jobs.find(j => j.id === d.employee_job)?.job_title;
+            return {
+                value: d.id,
+                label: `${jobName || 'بدون مسمى'} في ${structName || 'بدون قسم'} ${d.id === selectedVacancy?.id ? '(الحالي)' : ''}`
+            };
+        });
+
+    const handleVacancyChange = (val: string | number) => {
+        const vac = departments.find(d => d.id === val);
+        if (vac) {
+            const dStructId = typeof vac.structure_id === 'object' ? vac.structure_id?.id : vac.structure_id;
+            const dJobId = typeof vac.employee_job === 'object' ? vac.employee_job?.id : vac.employee_job;
+            setValue("department_id", dStructId || null);
+            setValue("job_id", dJobId || null);
+        } else {
+            setValue("department_id", null);
+            setValue("job_id", null);
+        }
+    };
+
     return (
         <div 
             className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200"
@@ -131,6 +170,8 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                 </div>
                 
                 <form onSubmit={handleSubmit(onSubmit)} className="contents">
+                    <input type="hidden" {...register("department_id")} />
+                    <input type="hidden" {...register("job_id")} />
                     <div className="p-8 bg-white dark:bg-slate-900 overflow-y-visible">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
                             <div className="absolute inset-y-0 left-1/2 w-px bg-gray-100 dark:bg-slate-800/80 hidden md:block"></div>
@@ -170,15 +211,14 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                                     />
                                 </div>
                                 <div className="flex flex-col gap-2 relative z-[90]">
-                                    <label className="text-sm font-bold text-gray-700 dark:text-gray-300">اسم القسم <span className="text-red-500">*</span></label>
-                                    <RelationSelect 
-                                        resource="Structures" 
-                                        fieldName="department_id" 
-                                        control={control} 
-                                        required={true} 
-                                        placeholder="اختر القسم الموجه إليه" 
+                                    <label className="text-sm font-bold text-gray-700 dark:text-gray-300">المنصب / الشاغر الموجه إليه <span className="text-red-500">*</span></label>
+                                    <CustomSelect 
+                                        options={vacancyOptions}
+                                        value={selectedVacancy?.id || ""}
+                                        onChange={handleVacancyChange}
+                                        placeholder="اختر المنصب الشاغر"
                                     />
-                                    {errors.department_id && <span className="text-red-500 text-xs font-bold">هذا الحقل مطلوب</span>}
+                                    {(!currentDepId || !currentJobId) && <span className="text-red-500 text-xs font-bold">هذا الحقل مطلوب</span>}
                                 </div>
                             </div>
 
@@ -198,15 +238,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-2 pt-2 relative z-[80]">
-                                    <label className="text-sm font-bold text-gray-700 dark:text-gray-300">اسم الوظيفة المدخلة <span className="text-red-500">*</span></label>
-                                    <RelationSelect 
-                                        resource="Employees" 
-                                        fieldName="job_id" 
-                                        control={control} 
-                                        required={true} 
-                                        placeholder="اختر الوظيفة الصحيحة" 
-                                    />
-                                    {errors.job_id && <span className="text-red-500 text-xs font-bold">هذا الحقل مطلوب</span>}
+                                    {/* Removed redundant Job relation select as it's now bundled with Vacancy */}
                                 </div>
                             </div>
                         </div>

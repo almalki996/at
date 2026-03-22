@@ -65,9 +65,9 @@ const PROPERTY_TYPES = {
 
 type PropertyKey = keyof typeof PROPERTY_TYPES;
 
-export default function DesignationsPage() {
+export default function DesignationsPage({ isEmbed = false, defaultProperty = "designations" }: { isEmbed?: boolean, defaultProperty?: PropertyKey }) {
     // State
-    const [activeProperty, setActiveProperty] = useState<PropertyKey>("designations");
+    const [activeProperty, setActiveProperty] = useState<PropertyKey>(defaultProperty);
     const config = PROPERTY_TYPES[activeProperty];
     const resourceName = activeProperty;
     const [searchQuery, setSearchQuery] = useState("");
@@ -287,55 +287,64 @@ export default function DesignationsPage() {
     };
 
     return (
-        <div className="w-full h-[calc(100vh-5rem)] flex flex-col p-4 md:p-6 mx-auto overflow-hidden rtl">
+        <div className={`w-full flex flex-col overflow-hidden rtl ${isEmbed ? 'flex-1' : 'h-[calc(100vh-5rem)] p-4 md:p-6 mx-auto'}`}>
             {/* Top Toolbar matching legacy UI */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 px-6 py-4 mb-5 shrink-0 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4 flex-1">
                     <div className="flex items-center gap-3">
-                        <label className="text-sm font-bold text-gray-700 dark:text-gray-300 shrink-0">اختر الخاصية المطلوبة</label>
-                        <div className="relative z-50">
-                            <button 
-                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                className="w-full flex items-center justify-between gap-4 bg-gray-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-teal-700 dark:text-teal-400 font-bold text-sm rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 px-4 py-2.5 outline-none cursor-pointer min-w-[180px] transition-all shadow-sm"
-                            >
-                                <span>{
-                                    [
-                                        { value: "designations", label: "الكادر الوظيفي" },
-                                        { value: "job_types", label: "نوع الوظيفة" },
-                                        { value: "job_axes", label: "المحور" }
-                                    ].find(opt => opt.value === activeProperty)?.label
-                                }</span>
-                                <ChevronDown size={18} className={`text-gray-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
-                            </button>
-                            
-                            {isDropdownOpen && (
-                                <>
-                                    <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)}></div>
-                                    <div className="absolute top-full right-0 mt-2 w-full min-w-[180px] bg-white dark:bg-slate-800 rounded-xl shadow-xl border-2 border-gray-100 dark:border-slate-700/80 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                                        <div className="flex flex-col py-1">
-                                            {[
+                        {!isEmbed && (
+                            <>
+                                <label className="text-sm font-bold text-gray-700 dark:text-gray-300 shrink-0">اختر الخاصية المطلوبة</label>
+                                <div className="relative z-50">
+                                    <button 
+                                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                        className="w-full flex items-center justify-between gap-4 bg-gray-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-teal-700 dark:text-teal-400 font-bold text-sm rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 px-4 py-2.5 outline-none cursor-pointer min-w-[180px] transition-all shadow-sm"
+                                    >
+                                        <span>{
+                                            [
                                                 { value: "designations", label: "الكادر الوظيفي" },
                                                 { value: "job_types", label: "نوع الوظيفة" },
                                                 { value: "job_axes", label: "المحور" }
-                                            ].map((option) => (
-                                                <button
-                                                    key={option.value}
-                                                    onClick={() => {
-                                                        setActiveProperty(option.value as PropertyKey);
-                                                        setSearchQuery("");
-                                                        setIsDropdownOpen(false);
-                                                    }}
-                                                    className={`px-4 py-2.5 text-sm font-bold text-right transition-colors flex items-center justify-between outline-none ${activeProperty === option.value ? 'bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300' : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/50'}`}
-                                                >
-                                                    {option.label}
-                                                    {activeProperty === option.value && <Check size={16} className="text-teal-600 dark:text-teal-400" />}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-                        </div>
+                                            ].find(opt => opt.value === activeProperty)?.label
+                                        }</span>
+                                        <ChevronDown size={18} className={`text-gray-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                                    </button>
+                                    
+                                    {isDropdownOpen && (
+                                        <>
+                                            <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)}></div>
+                                            <div className="absolute top-full right-0 mt-2 w-full min-w-[180px] bg-white dark:bg-slate-800 rounded-xl shadow-xl border-2 border-gray-100 dark:border-slate-700/80 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                                                <div className="flex flex-col py-1">
+                                                    {[
+                                                        { value: "designations", label: "الكادر الوظيفي" },
+                                                        { value: "job_types", label: "نوع الوظيفة" },
+                                                        { value: "job_axes", label: "المحور" }
+                                                    ].map((option) => (
+                                                        <button
+                                                            key={option.value}
+                                                            onClick={() => {
+                                                                setActiveProperty(option.value as PropertyKey);
+                                                                setSearchQuery("");
+                                                                setIsDropdownOpen(false);
+                                                            }}
+                                                            className={`px-4 py-2.5 text-sm font-bold text-right transition-colors flex items-center justify-between outline-none ${activeProperty === option.value ? 'bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300' : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/50'}`}
+                                                        >
+                                                            {option.label}
+                                                            {activeProperty === option.value && <Check size={16} className="text-teal-600 dark:text-teal-400" />}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </>
+                        )}
+                        {isEmbed && (
+                            <div className="bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-400 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 border border-teal-100 dark:border-teal-800 shadow-sm">
+                                {config.pageTitle}
+                            </div>
+                        )}
                     </div>
                 </div>
 

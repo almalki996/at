@@ -200,7 +200,7 @@ export default function DepartmentsPage() {
             errorNotification: false
         }, {
             onSuccess: () => {
-                toast.success(`تم تغيير حالة ${selectedIds.size} وظيفة إلى ${status}`);
+                toast.success(`تم تغيير حالة ${selectedIds.size} شاغر إلى ${status}`);
                 setSelectedIds(new Set());
                 setIsBulkDeleteModalOpen(false);
                 refetch?.();
@@ -218,7 +218,7 @@ export default function DepartmentsPage() {
             errorNotification: false
         }, {
             onSuccess: () => {
-                toast.success(`تم حذف ${selectedIds.size} وظيفة بنجاح`);
+                toast.success(`تم حذف ${selectedIds.size} شاغر بنجاح`);
                 setSelectedIds(new Set());
                 setIsBulkDeleteModalOpen(false);
                 refetch?.();
@@ -397,9 +397,9 @@ export default function DepartmentsPage() {
                             <Briefcase size={24} />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">بناء الوظائف</h1>
+                            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">تخطيط المناصب والشواغر</h1>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                استعراض وإدارة ربط الوظائف بالهيكل التنظيمي.
+                                إدارة توزيع المقاعد الوظيفية، تحديد المناصب الشاغرة والمشغولة في الهيكل.
                             </p>
                         </div>
                     </div>
@@ -484,12 +484,43 @@ export default function DepartmentsPage() {
                             className="flex items-center justify-center gap-2 px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-medium transition-colors w-full sm:w-auto shadow-sm shadow-teal-600/20 shrink-0"
                         >
                             <Plus size={18} />
-                            إضافة وظيفة
+                            إضافة شاغر جديد
                         </button>
                     </div>
                 </div>
 
 
+            </div>
+
+            {/* Dashboard Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-slate-400">إجمالي المقاعد (المناصب)</p>
+                        <h3 className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{listData.length}</h3>
+                    </div>
+                    <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                        <Briefcase size={24} />
+                    </div>
+                </div>
+                <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-slate-400">مقاعد مشغولة</p>
+                        <h3 className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{listData.filter((i: any) => i.job_status === 'مشغولة').length}</h3>
+                    </div>
+                    <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                        <CheckCircle size={24} />
+                    </div>
+                </div>
+                <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-slate-400">مقاعد شاغرة</p>
+                        <h3 className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{listData.filter((i: any) => i.job_status === 'شاغرة').length}</h3>
+                    </div>
+                    <div className="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
+                        <AlertCircle size={24} />
+                    </div>
+                </div>
             </div>
 
             {/* Table */}
@@ -698,7 +729,7 @@ export default function DepartmentsPage() {
                             </div>
                             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">تأكيد الحذف</h3>
                             <p className="text-gray-600 dark:text-rose-200/70">
-                                هل أنت متأكد من حذف هذه الوظيفة بشكل نهائي؟ لا يمكن التراجع عن هذا الإجراء.
+                                هل أنت متأكد من حذف هذا الشاغر بشكل نهائي؟ لا يمكن التراجع عن هذا الإجراء.
                             </p>
                         </div>
                         <div className="p-4 bg-gray-50 dark:bg-slate-800/50 flex items-center justify-end gap-3 border-t border-gray-100 dark:border-slate-800">
@@ -735,7 +766,7 @@ export default function DepartmentsPage() {
                         <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-gray-50/50 dark:bg-slate-800/50">
                             <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
                                 <Briefcase className="text-teal-600 dark:text-teal-400" size={20} />
-                                {itemToEdit ? "تعديل الوظيفة" : "إضافة وظيفة جديدة"}
+                                {itemToEdit ? "تعديل الشاغر" : "إضافة شاغر جديد"}
                             </h2>
                             <button
                                 onClick={() => setIsModalOpen(false)}
@@ -958,7 +989,7 @@ export default function DepartmentsPage() {
                     <div className="bg-slate-800 dark:bg-slate-900 pointer-events-auto rounded-2xl shadow-2xl p-2 sm:p-3 flex flex-wrap items-center justify-center gap-2 sm:gap-4 border border-slate-700 mx-4 sm:mx-0 max-w-[95vw] shadow-black/50 overflow-x-auto custom-scrollbar">
                         <div className="flex items-center gap-2 text-white font-bold px-2 sm:px-4 text-sm shrink-0">
                             <CheckCircle size={18} className="text-teal-400 hidden sm:block shrink-0" />
-                            <span className="whitespace-nowrap">تم تحديد {selectedIds.size} وظيفة</span>
+                            <span className="whitespace-nowrap">تم تحديد {selectedIds.size} شاغر</span>
                         </div>
                         
                         <div className="h-4 w-px bg-slate-700 hidden sm:block shrink-0"></div>

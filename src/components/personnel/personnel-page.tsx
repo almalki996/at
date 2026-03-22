@@ -87,11 +87,13 @@ export default function PersonnelPage() {
 
     const { query: structuresQuery } = useList({ resource: "Structures", pagination: { pageSize: 500 } });
     const { query: jobsQuery } = useList({ resource: "Employees", pagination: { pageSize: 500 } });
+    const { query: departmentsQuery } = useList({ resource: "Departments", pagination: { pageSize: 500 } });
     const { query: assignmentsQuery } = useList({ resource: "Employee_Assignments", pagination: { pageSize: 500 } });
     const { query: qualificationsQuery } = useList({ resource: "Employee_Qualifications", pagination: { pageSize: 500 } });
 
     const structuresData = structuresQuery.data;
     const jobsData = jobsQuery.data;
+    const depsData = departmentsQuery.data;
     const assignmentsData = assignmentsQuery.data;
     const qualificationsData = qualificationsQuery.data;
     const refetchAssignments = assignmentsQuery.refetch;
@@ -100,6 +102,7 @@ export default function PersonnelPage() {
     const personnelList = data?.data || [];
     const structures = structuresData?.data || [];
     const jobs = jobsData?.data || [];
+    const departmentsList = depsData?.data || [];
     const assignmentsList = assignmentsData?.data || [];
     const qualificationsList = qualificationsData?.data || [];
 
@@ -613,6 +616,7 @@ export default function PersonnelPage() {
                 itemToEdit={itemToEdit}
                 onSuccess={refetch}
                 jobs={jobs}
+                departmentsList={departmentsList}
                 assignmentsList={assignmentsList}
                 qualificationsList={qualificationsList}
                 structuresMap={structuresMap}
@@ -633,6 +637,7 @@ export default function PersonnelPage() {
                 qualificationsList={qualificationsList}
                 structuresMap={structuresMap}
                 jobsList={jobs}
+                departmentsList={departmentsList}
                 onPreview={handlePreviewUrl}
             />
 
@@ -643,6 +648,7 @@ export default function PersonnelPage() {
                 personnelId={itemToEdit?.id}
                 structures={structures}
                 jobs={jobs}
+                departments={departmentsList}
                 onSuccess={() => { refetchAssignments(); refetch(); }}
             />
 
