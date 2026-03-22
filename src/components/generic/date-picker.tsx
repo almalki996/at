@@ -40,6 +40,7 @@ export function DatePickerField({ control, name, placeholder = "اختر الت�
                         className={`w-full pl-4 pr-11 py-2.5 bg-white dark:bg-slate-900 text-gray-900 dark:text-white border-2 rounded-xl focus:ring-4 outline-none transition-all cursor-pointer font-sans ${error ? 'border-red-400 focus:border-red-500 focus:ring-red-500/10' : 'border-gray-200 dark:border-slate-700 focus:border-teal-500 focus:ring-teal-500/10'}`}
                         wrapperClassName="w-full"
                         showPopperArrow={false}
+                        todayButton="اليوم"
                         portalId="datepicker-portal"
                         popperProps={{
                             strategy: "fixed"

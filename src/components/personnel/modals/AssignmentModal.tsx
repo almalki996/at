@@ -24,6 +24,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
     onSuccess 
 }) => {
     const [file, setFile] = useState<File | null>(null);
+    const [removedAttachment, setRemovedAttachment] = useState(false);
     const [uploadingState, setUploadingState] = useState(false);
 
     const { 
@@ -55,6 +56,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
     useEffect(() => {
         if (isOpen) {
             setFile(null);
+            setRemovedAttachment(false);
             if (initialData) {
                 reset({
                     subject: initialData.subject,
@@ -75,6 +77,10 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
 
     const onSubmit = async (data: any) => {
         let attachmentId = initialData?.attachment || null;
+        if (removedAttachment && !file) {
+            attachmentId = null;
+        }
+
         if (file) {
             setUploadingState(true);
             try {
@@ -229,13 +235,33 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                                 {uploadingState ? "جاري الرفع..." : "حفظ"}
                             </button>
                         </div>
-                        <label className="flex items-center justify-center gap-2 flex-1 sm:flex-none px-6 py-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-gray-800 dark:text-white rounded-xl text-sm font-bold transition-colors cursor-pointer border shadow-sm border-transparent hover:border-slate-400">
-                            <Paperclip size={18} className="rotate-45" />
-                            <span className="truncate max-w-[150px]">{file ? file.name : "إضافة/تغيير المرفق (PDF...)"}</span>
-                            <input type="file" className="hidden" onChange={(e) => {
-                                if (e.target.files?.[0]) setFile(e.target.files[0]);
-                            }} />
-                        </label>
+                        <div className="flex items-center justify-center gap-2 flex-1 sm:flex-none">
+                            {(file || (initialData?.attachment && !removedAttachment)) && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setFile(null);
+                                        setRemovedAttachment(true);
+                                    }}
+                                    className="p-2 text-rose-500 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 rounded-xl transition-colors shrink-0"
+                                    title="حذف المرفق"
+                                >
+                                    <X size={20} />
+                                </button>
+                            )}
+                            <label className="flex items-center justify-center gap-2 px-6 py-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-gray-800 dark:text-white rounded-xl text-sm font-bold transition-colors cursor-pointer border shadow-sm border-transparent hover:border-slate-400 w-full sm:w-auto">
+                                <Paperclip size={18} className="rotate-45" />
+                                <span className="truncate max-w-[150px]">
+                                    {file ? file.name : (initialData?.attachment && !removedAttachment ? "مرفق حالي (تغيير؟)" : "إضافة/تغيير المرفق")}
+                                </span>
+                                <input type="file" className="hidden" onChange={(e) => {
+                                    if (e.target.files?.[0]) {
+                                        setFile(e.target.files[0]);
+                                        setRemovedAttachment(false);
+                                    }
+                                }} />
+                            </label>
+                        </div>
                     </div>
                 </form>
             </div>

@@ -24,7 +24,7 @@ const RecursiveMenuItem = ({ item, level, pathname, isCollapsed }: { item: any; 
     return (
         <li className="flex flex-col">
             <div 
-                className={`flex items-center px-4 py-2 hover:bg-indigo-50 dark:hover:bg-slate-800/80 cursor-pointer transition-colors ${isSelected ? 'bg-indigo-100/80 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-bold border-r-4 border-indigo-600 dark:border-indigo-400' : 'text-gray-700 dark:text-gray-300 border-r-4 border-transparent'} ${level > 0 ? "text-sm text-gray-600 dark:text-gray-400" : "text-[15px] font-semibold"} ${isCollapsed ? 'justify-center border-none' : 'justify-between'}`}
+                className={`flex items-center px-4 py-2 hover:bg-indigo-50 dark:hover:bg-slate-800/80 cursor-pointer transition-colors ${isSelected ? 'bg-indigo-100/80 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-bold border-r-4 border-indigo-600 dark:border-indigo-400' : 'text-gray-700 dark:text-gray-300 border-r-4 border-transparent'} ${level > 0 ? "text-[15px] font-medium text-gray-700 dark:text-gray-300" : "text-[15px] font-bold"} ${isCollapsed ? 'justify-center border-none' : 'justify-between'}`}
                 style={{ paddingRight: isCollapsed ? '0' : `${(level + 1) * 1.25}rem` }}
                 title={isCollapsed ? item.label : undefined}
                 onClick={(e) => {

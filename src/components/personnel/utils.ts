@@ -1,6 +1,9 @@
 export const uploadFile = async (file: File): Promise<string> => {
     const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL?.replace('/items', '');
-    const token = process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
+    let token = process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
+    if (typeof window !== "undefined") {
+        token = localStorage.getItem("directus_token") || token;
+    }
     
     const form = new FormData();
     form.append('file', file);
