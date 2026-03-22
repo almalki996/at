@@ -146,6 +146,16 @@ export default function ListView({ onBack }: ListViewProps) {
                                     <Edit size={16} /> تعديل
                                 </button>
                             )}
+                            
+                            {!isEditing && (
+                                <button 
+                                    onClick={() => window.print()}
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl transition-all border border-gray-200 dark:border-slate-700 hidden sm:flex"
+                                    title="طباعة التقويم"
+                                >
+                                    <Printer size={16} /> طباعة
+                                </button>
+                            )}
 
                             <div className="flex items-center gap-3 bg-gray-50 dark:bg-slate-800/50 px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 h-[42px]">
                                 <label className="text-gray-700 dark:text-gray-300 select-none cursor-pointer flex items-center gap-2">

@@ -90,3 +90,18 @@ body {
 .react-datepicker__current-month {
   @apply hidden!; /* Hide original label since we have dropdowns now */
 }
+
+@media print {
+  body {
+    background: white !important;
+  }
+  header, aside, .sidebar, .navbar, .refine-sider, .refine-header {
+    display: none !important;
+  }
+  main, .ant-layout-content, .refine-content-wrapper, .refine-layout {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
