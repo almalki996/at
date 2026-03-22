@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { useList, useUpdate } from "@refinedev/core";
+import { useList, useUpdate, useDelete } from "@refinedev/core";
 import { calculateStats, getArabicWeekName, arabicWeekDays, formatDateOnly, getHijriDate } from "./utils";
 import { CalendarEvent, CalendarWeek, DayType } from "./types";
-import { ArrowRight, Save, X, Edit, Calendar as CalendarIcon, CalendarDays, CheckCircle2, GraduationCap, Tent, Globe, Printer } from "lucide-react";
+import { ArrowRight, Save, X, Edit, Calendar as CalendarIcon, CalendarDays, CheckCircle2, GraduationCap, Tent, Globe, Printer, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { CustomSelect } from "../generic/custom-select";
 
@@ -32,6 +32,7 @@ export default function ListView({ onBack }: ListViewProps) {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { mutate: updateRecord } = useUpdate();
+    const { mutate: deleteRecord } = useDelete();
 
     useEffect(() => {
         if (selectedCalendar) {
@@ -82,6 +83,27 @@ export default function ListView({ onBack }: ListViewProps) {
                 toast.error(err?.message || "حدث خطأ أثناء التحديث");
             }
         });
+    };
+
+    const handleDelete = () => {
+        if (!selectedCalendar) return;
+        if (window.confirm("هل أنت متأكد من حذف هذا التقويم التدريبي بالكامل؟ لا يمكن التراجع عن هذا الإجراء.")) {
+            setIsSubmitting(true);
+            deleteRecord({
+                resource: "calendar",
+                id: selectedCalendar.id!,
+                successNotification: () => ({ message: "تم حذف التقويم بنجاح", type: "success" })
+            }, {
+                onSuccess: () => {
+                    setIsSubmitting(false);
+                    setSelectedId(""); // Clear selection
+                },
+                onError: (err) => {
+                    setIsSubmitting(false);
+                    toast.error(err?.message || "حدث خطأ أثناء الحذف");
+                }
+            });
+        }
     };
 
     const toggleDayType = (weekIdx: number, dayIdx: number) => {
@@ -148,13 +170,23 @@ export default function ListView({ onBack }: ListViewProps) {
                             )}
                             
                             {!isEditing && (
-                                <button 
-                                    onClick={() => window.print()}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl transition-all border border-gray-200 dark:border-slate-700 hidden sm:flex"
-                                    title="طباعة التقويم"
-                                >
-                                    <Printer size={16} /> طباعة
-                                </button>
+                                <>
+                                    <button 
+                                        onClick={handleDelete}
+                                        disabled={isSubmitting}
+                                        className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-800/50 text-rose-600 dark:text-rose-400 rounded-xl transition-all border border-rose-200 dark:border-rose-800 disabled:opacity-50"
+                                        title="حذف التقويم"
+                                    >
+                                        <Trash2 size={16} /> حذف
+                                    </button>
+                                    <button 
+                                        onClick={() => window.print()}
+                                        className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl transition-all border border-gray-200 dark:border-slate-700 hidden sm:flex"
+                                        title="طباعة التقويم"
+                                    >
+                                        <Printer size={16} /> طباعة
+                                    </button>
+                                </>
                             )}
 
                             <div className="flex items-center gap-3 bg-gray-50 dark:bg-slate-800/50 px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 h-[42px]">
@@ -247,8 +279,8 @@ export default function ListView({ onBack }: ListViewProps) {
                     </div>
 
                     {/* Weeks Grid */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-4 print:overflow-visible print:border-none print:shadow-none print:p-0">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 print:grid-cols-3 print:gap-2">
                             {localData.map((week, wIdx) => {
                                 let wT = 0, wV = 0, wE = 0;
                                 week.days.forEach(d => {
