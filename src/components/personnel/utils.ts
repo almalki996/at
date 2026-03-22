@@ -17,7 +17,12 @@ export const uploadFile = async (file: File): Promise<string> => {
     });
     
     if (!res.ok) {
-        throw new Error("File upload failed");
+        let errMessage = "File upload failed";
+        try {
+            const errorData = await res.json();
+            errMessage = errorData?.errors?.[0]?.message || errMessage;
+        } catch(e) {}
+        throw new Error(errMessage);
     }
     
     const data = await res.json();

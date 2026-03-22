@@ -93,6 +93,8 @@ const CustomSelect = ({
 
 export default function DepartmentsPage() {
     const [searchQuery, setSearchQuery] = useState("");
+    const [filterDesignation, setFilterDesignation] = useState<string | number>("all");
+    const [filterStatus, setFilterStatus] = useState<string>("all");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
@@ -170,14 +172,26 @@ export default function DepartmentsPage() {
 
     // Filter Items
     const filteredItems = useMemo(() => {
-        if (!searchQuery.trim()) return listData;
-        const lowerQuery = searchQuery.toLowerCase();
-        return listData.filter((item: any) => {
-            const structureName = structuresMap.get(item.structure_id)?.name?.toLowerCase() || "";
-            const employeeTitle = employeesMap.get(item.employee_job)?.job_title?.toLowerCase() || "";
-            return structureName.includes(lowerQuery) || employeeTitle.includes(lowerQuery);
-        });
-    }, [listData, searchQuery, structuresMap, employeesMap]);
+        let items = listData;
+        if (filterDesignation !== "all") {
+            items = items.filter((item: any) => {
+                const desigId = typeof item.designation === 'object' ? (item.designation as any)?.id : item.designation;
+                return String(desigId) === String(filterDesignation);
+            });
+        }
+        if (filterStatus !== "all") {
+            items = items.filter((item: any) => item.job_status === filterStatus);
+        }
+        if (searchQuery.trim()) {
+            const lowerQuery = searchQuery.toLowerCase();
+            items = items.filter((item: any) => {
+                const structureName = structuresMap.get(item.structure_id)?.name?.toLowerCase() || "";
+                const employeeTitle = employeesMap.get(item.employee_job)?.job_title?.toLowerCase() || "";
+                return structureName.includes(lowerQuery) || employeeTitle.includes(lowerQuery);
+            });
+        }
+        return items;
+    }, [listData, searchQuery, filterDesignation, filterStatus, structuresMap, employeesMap]);
 
     // Derived filtered employees for the dropdown based on selected designation
     const selectedDesignationEmployees = useMemo(() => {
@@ -406,8 +420,8 @@ export default function DepartmentsPage() {
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-6 flex flex-col md:flex-row justify-between items-center gap-4 transition-colors duration-200 relative overflow-hidden">
                 
                 {/* Default Header */}
-                <div className={`w-full flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-300 ${selectedIds.size > 0 ? 'opacity-0 -translate-y-4 pointer-events-none absolute' : 'opacity-100 translate-y-0'}`}>
-                    <div className="flex items-center gap-3 w-full md:w-auto">
+                <div className="w-full flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+                    <div className="flex items-center gap-3 w-full xl:w-auto shrink-0">
                         <div className="w-12 h-12 shrink-0 rounded-xl bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center text-teal-600 dark:text-teal-400">
                             <Briefcase size={24} />
                         </div>
@@ -419,9 +433,35 @@ export default function DepartmentsPage() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto shrink-0">
+                    <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 w-full xl:w-auto shrink-0">
+                        {/* Status Filter */}
+                        <div className="w-full sm:w-36">
+                            <select
+                                value={filterStatus}
+                                onChange={(e) => setFilterStatus(e.target.value)}
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200 text-gray-700 dark:text-slate-300"
+                            >
+                                <option value="all">الكل (الحالة)</option>
+                                <option value="شاغرة">شاغرة</option>
+                                <option value="مشغولة">مشغولة</option>
+                                <option value="مجمدة">مجمدة</option>
+                            </select>
+                        </div>
+                        {/* Designation Filter */}
+                        <div className="w-full sm:w-44">
+                            <select
+                                value={filterDesignation}
+                                onChange={(e) => setFilterDesignation(e.target.value)}
+                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200 text-gray-700 dark:text-slate-300"
+                            >
+                                <option value="all">الكل (الكادر)</option>
+                                {designations.map(d => (
+                                    <option key={d.id} value={d.id}>{d.name || d.id}</option>
+                                ))}
+                            </select>
+                        </div>
                         {/* Search */}
-                        <div className="relative w-full sm:w-64">
+                        <div className="relative w-full sm:w-56">
                             <input
                                 type="text"
                                 placeholder="بحث..."
@@ -437,57 +477,12 @@ export default function DepartmentsPage() {
                             className="flex items-center justify-center gap-2 px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-medium transition-colors w-full sm:w-auto shadow-sm shadow-teal-600/20"
                         >
                             <Plus size={18} />
-                            إضافة وظيفة جديدة
+                            إضافة وظيفة
                         </button>
                     </div>
                 </div>
 
-                {/* Bulk Actions Toolbar Overlay */}
-                <div className={`flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-300 absolute inset-0 bg-teal-50/95 dark:bg-teal-900/40 backdrop-blur-sm p-4 sm:p-6 ${selectedIds.size > 0 ? 'opacity-100 translate-y-0 relative' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
-                    <div className="flex items-center gap-3 text-teal-800 dark:text-teal-200 font-bold shrink-0">
-                        <CheckCircle size={24} className="text-teal-600 dark:text-teal-400 hidden sm:block" />
-                        <span>تم تحديد {selectedIds.size}</span>
-                    </div>
-                    <div className="flex flex-wrap justify-center md:justify-end items-center gap-2 sm:gap-3 w-full md:w-auto">
-                        <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-2 p-1 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-teal-100 dark:border-teal-900/50">
-                            <button
-                                onClick={() => handleBulkStatusUpdate("شاغرة")}
-                                className="px-3 py-1.5 text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-800/40 rounded-lg transition-colors"
-                            >
-                                تحويل لشاغرة
-                            </button>
-                            <button
-                                onClick={() => handleBulkStatusUpdate("مشغولة")}
-                                className="px-3 py-1.5 text-xs font-bold bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-900/20 dark:text-rose-300 dark:hover:bg-rose-800/40 rounded-lg transition-colors"
-                            >
-                                تحويل لمشغولة
-                            </button>
-                            <button
-                                onClick={() => handleBulkStatusUpdate("مجمدة")}
-                                className="px-3 py-1.5 text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                            >
-                                تجميد
-                            </button>
-                        </div>
-                        
-                        <div className="w-px h-8 bg-teal-200 dark:bg-teal-800/50 mx-1"></div>
-                        
-                        <button
-                            onClick={() => setIsBulkDeleteModalOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-rose-600 bg-white hover:bg-rose-50 dark:bg-slate-800 dark:hover:bg-rose-900/30 rounded-xl transition-all shadow-sm border border-rose-100 dark:border-rose-900/30"
-                        >
-                            <Trash2 size={16} />
-                            حذف المحدد
-                        </button>
-                        <button
-                            onClick={() => setSelectedIds(new Set())}
-                            className="p-2 text-teal-600 hover:bg-teal-100 dark:text-teal-400 dark:hover:bg-teal-900/50 rounded-xl transition-colors"
-                            title="إلغاء التحديد"
-                        >
-                            <X size={20} />
-                        </button>
-                    </div>
-                </div>
+
             </div>
 
             {/* Table */}
@@ -928,6 +923,56 @@ export default function DepartmentsPage() {
                 </div>
             )}
 
+            {/* Bottom Floating Bulk Actions Bar */}
+            {selectedIds.size > 0 && (
+                <div className="fixed bottom-0 left-0 right-0 transform flex justify-center z-50 pointer-events-none mb-6 transition-all duration-300 animate-in slide-in-from-bottom-5">
+                    <div className="bg-slate-800 dark:bg-slate-900 pointer-events-auto rounded-2xl shadow-2xl p-2 sm:p-3 flex flex-wrap items-center justify-center gap-2 sm:gap-4 border border-slate-700 mx-4 sm:mx-0 max-w-[95vw] shadow-black/50 overflow-x-auto custom-scrollbar">
+                        <div className="flex items-center gap-2 text-white font-bold px-2 sm:px-4 text-sm shrink-0">
+                            <CheckCircle size={18} className="text-teal-400 hidden sm:block shrink-0" />
+                            <span className="whitespace-nowrap">تم تحديد {selectedIds.size} وظيفة</span>
+                        </div>
+                        
+                        <div className="h-4 w-px bg-slate-700 hidden sm:block shrink-0"></div>
+                        
+                        <div className="flex flex-wrap items-center justify-center gap-2 shrink-0">
+                            <button
+                                onClick={() => handleBulkStatusUpdate("شاغرة")}
+                                className="px-3 py-1.5 text-xs sm:text-sm font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-xl transition-colors whitespace-nowrap"
+                            >
+                                شاغرة
+                            </button>
+                            <button
+                                onClick={() => handleBulkStatusUpdate("مشغولة")}
+                                className="px-3 py-1.5 text-xs sm:text-sm font-bold bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 rounded-xl transition-colors whitespace-nowrap"
+                            >
+                                مشغولة
+                            </button>
+                            <button
+                                onClick={() => handleBulkStatusUpdate("مجمدة")}
+                                className="px-3 py-1.5 text-xs sm:text-sm font-bold bg-slate-500/10 text-slate-300 hover:bg-slate-500/30 rounded-xl transition-colors whitespace-nowrap"
+                            >
+                                تجميد
+                            </button>
+                            
+                            <div className="h-4 w-px bg-slate-700 mx-1 shrink-0"></div>
+                            
+                            <button
+                                onClick={() => setIsBulkDeleteModalOpen(true)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-bold text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all whitespace-nowrap"
+                            >
+                                <Trash2 size={16} /> <span className="hidden sm:inline">حذف</span>
+                            </button>
+                            <button
+                                onClick={() => setSelectedIds(new Set())}
+                                className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl transition-colors shrink-0"
+                                title="إلغاء التحديد"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -72,8 +72,8 @@ export const QualificationModal: React.FC<QualificationModalProps> = ({ isOpen, 
             setUploadingState(true);
             try {
                 attachmentId = await uploadFile(file);
-            } catch (uploadError) {
-                toast.error("حدث خطأ أثناء رفع المرفق");
+            } catch (uploadError: any) {
+                toast.error(`حدث خطأ أثناء رفع المرفق: ${uploadError?.message || 'غير معروف'}`);
                 setUploadingState(false);
                 return; // Stop submittal if upload fails
             }
