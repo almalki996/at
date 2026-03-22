@@ -5,6 +5,7 @@ import { Refine } from "@refinedev/core";
 import routerProvider from "@refinedev/nextjs-router";
 import { directusDataProvider } from "./data-provider";
 import { notificationProvider } from "./notification-provider";
+import { authProvider } from "./auth-provider";
 import { AppLayout } from "@/components/layout";
 
 export function RefineProvider({ children }: { children: React.ReactNode }) {
@@ -14,6 +15,7 @@ export function RefineProvider({ children }: { children: React.ReactNode }) {
         routerProvider={routerProvider}
         dataProvider={directusDataProvider}
         notificationProvider={notificationProvider}
+        authProvider={authProvider}
         resources={[
           {
               name: "system_settings",

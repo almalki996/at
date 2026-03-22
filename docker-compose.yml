@@ -1,20 +1,21 @@
-version: "3"
+version: "3.8"
 services:
   database:
     image: postgres:15
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_USER: "directus"
       POSTGRES_PASSWORD: "directus_password"
       POSTGRES_DB: "directus"
     volumes:
       - directus-data:/var/lib/postgresql/data
+    restart: always
+    # Removed port 5432 mapping so it doesn't conflict with other Postgres containers on the VPS
+    # It will remain accessible internally to Directus via the "database" hostname
 
   directus:
     image: directus/directus:latest
     ports:
-      - "8055:8055"
+      - "3012:8055"
     depends_on:
       - database
     environment:
@@ -30,9 +31,28 @@ services:
       ADMIN_PASSWORD: "password"
       ADMIN_TOKEN: "strategic_plans_super_secure_admin_token"
       CORS_ENABLED: "true"
-      CORS_ORIGIN: "true"
+      CORS_ORIGIN: "https://at.sofoit.pro"
       CORS_METHODS: "GET,POST,PATCH,DELETE,OPTIONS"
       CORS_ALLOWED_HEADERS: "Content-Type,Authorization"
+      PUBLIC_URL: "https://at-api.sofoit.pro"
+    restart: always
+
+  frontend:
+    build: 
+      context: .
+      args:
+        - NEXT_PUBLIC_DIRECTUS_URL=https://at-api.sofoit.pro/items
+        - NEXT_PUBLIC_DIRECTUS_TOKEN=strategic_plans_super_secure_admin_token
+    ports:
+      - "3011:3000"
+    environment:
+      - DIRECTUS_URL=http://directus:8055
+      - NEXT_PUBLIC_DIRECTUS_URL=https://at-api.sofoit.pro/items
+      - DIRECTUS_ADMIN_TOKEN=strategic_plans_super_secure_admin_token
+      - NEXT_PUBLIC_DIRECTUS_TOKEN=strategic_plans_super_secure_admin_token
+    depends_on:
+      - directus
+    restart: always
 
 volumes:
   directus-data:

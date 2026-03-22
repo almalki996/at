@@ -190,7 +190,7 @@ export const Sidebar = () => {
 
             <div className="p-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50 transition-colors duration-300">
                 <button 
-                    onClick={() => { window.location.href = '/'; }}
+                    onClick={() => logout()}
                     className={`flex items-center ${isCollapsed ? 'justify-center border border-gray-200 dark:border-slate-700' : 'gap-3 px-4 border border-transparent hover:border-red-100 dark:hover:border-red-900/50'} w-full py-2.5 hover:bg-red-50 dark:hover:bg-red-950/30 text-red-600 dark:text-red-400 rounded-xl transition-colors font-bold shadow-sm`}
                     title="تسجيل الخروج"
                 >

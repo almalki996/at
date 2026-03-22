@@ -3,10 +3,16 @@ import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || "http://localhost:8055/items";
 
-const axiosInstance = axios.create({
-    headers: {
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`
+export const axiosInstance = axios.create();
+
+axiosInstance.interceptors.request.use((config) => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("directus_token") : null;
+    const finalToken = token || process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
+    
+    if (finalToken && config.headers) {
+        config.headers.Authorization = `Bearer ${finalToken}`;
     }
+    return config;
 });
 
 axiosInstance.interceptors.response.use(
