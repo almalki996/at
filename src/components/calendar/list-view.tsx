@@ -230,9 +230,9 @@ export default function ListView({ onBack }: ListViewProps) {
 
             {/* Content Area */}
             {selectedCalendar ? (
-                <div className="flex-1 flex flex-col gap-4 overflow-hidden">
+                <div className="flex-1 flex flex-col gap-4 overflow-hidden print:overflow-visible">
                     {/* Stats Header matching Image 4 */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 shrink-0">
+                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 shrink-0 print:grid-cols-3 print:gap-2 print:break-inside-avoid">
                         
                         <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 flex flex-col items-center justify-center border border-orange-100 dark:border-orange-900/50">
                             <div className="text-orange-500 mb-1"><CalendarIcon size={24} /></div>
@@ -280,7 +280,7 @@ export default function ListView({ onBack }: ListViewProps) {
 
                     {/* Weeks Grid */}
                     <div className="flex-1 overflow-y-auto custom-scrollbar bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-4 print:overflow-visible print:border-none print:shadow-none print:p-0">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 print:grid-cols-3 print:gap-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 print:grid-cols-2 print:gap-4">
                             {localData.map((week, wIdx) => {
                                 let wT = 0, wV = 0, wE = 0;
                                 week.days.forEach(d => {

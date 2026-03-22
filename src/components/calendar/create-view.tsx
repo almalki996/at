@@ -271,7 +271,7 @@ export default function CreateView({ onBack }: CreateViewProps) {
                         تم تحميل {weeksData.length} أسبوع بنجاح
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 pb-4 print:grid-cols-3 print:gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 pb-4 print:grid-cols-2 print:gap-4">
                         {weeksData.map((week, wIdx) => {
                             // Calculate week stats locally just for the UI header matching Image 4 (training/vacation/event counts)
                             let wT = 0, wV = 0, wE = 0;
