@@ -388,7 +388,7 @@ export default function DepartmentsPage() {
     return (
         <div className="p-6 max-w-[1600px] mx-auto space-y-6">
             {/* Header */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-6 flex flex-col md:flex-row justify-between items-center gap-4 transition-colors duration-200 relative overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-6 flex flex-col md:flex-row justify-between items-center gap-4 transition-colors duration-200 relative z-20">
                 
                 {/* Default Header */}
                 <div className="w-full flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
