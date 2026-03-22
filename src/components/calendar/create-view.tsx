@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useCreate } from "@refinedev/core";
-import { generateWeeks, calculateStats, getArabicWeekName, arabicWeekDays, formatDateOnly } from "./utils";
-import { CalendarWeek, DayType } from "./types";
-import { ArrowRight, Calendar as CalendarIcon, Save, RefreshCw, CheckCircle2, Circle } from "lucide-react";
+import { useCreate, useList } from "@refinedev/core";
+import { generateWeeks, calculateStats, getArabicWeekName, arabicWeekDays, formatDateOnly, getHijriDate } from "./utils";
+import { CalendarWeek, DayType, CalendarEvent } from "./types";
+import { ArrowRight, Calendar as CalendarIcon, Save, RefreshCw, CheckCircle2, Circle, CheckSquare, Printer } from "lucide-react";
 import toast from "react-hot-toast";
 import DatePicker, { registerLocale } from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -25,6 +25,13 @@ export default function CreateView({ onBack }: CreateViewProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedWeekends, setSelectedWeekends] = useState<number[]>([5, 6]);
     
+    // Fetch existing calendars for overlap validation
+    const { query: calendarsQuery } = useList<CalendarEvent>({
+        resource: "calendar",
+        // @ts-ignore
+        pagination: { mode: "off" }
+    });
+    
     const { mutate: createRecord } = useCreate();
 
     const stats = useMemo(() => calculateStats(weeksData), [weeksData]);
@@ -34,6 +41,26 @@ export default function CreateView({ onBack }: CreateViewProps) {
             toast.error("يرجى إدخال اسم الفترة وتاريخ البداية والنهاية");
             return;
         }
+
+        // Overlap Validation
+        const calendarsData = calendarsQuery?.data;
+        if (calendarsData?.data) {
+            const newStart = new Date(startDate);
+            const newEnd = new Date(endDate);
+            
+            const hasOverlap = calendarsData.data.some((cal: CalendarEvent) => {
+                if (cal.is_active === false) return false; // Ignore inactive calendars
+                const calStart = new Date(cal.start_date);
+                const calEnd = new Date(cal.end_date);
+                return (newStart <= calEnd) && (newEnd >= calStart);
+            });
+            
+            if (hasOverlap) {
+                toast.error("عذراً، هذه الفترة تتقاطع مع تقويم تدريبي آخر (مُفعّل) موجود مسبقاً في النظام.");
+                return;
+            }
+        }
+
         const generated = generateWeeks(startDate, endDate, selectedWeekends);
         if (generated.length === 0) {
             toast.error("تاريخ النهاية يجب أن يكون بعد تاريخ البداية");
@@ -63,6 +90,14 @@ export default function CreateView({ onBack }: CreateViewProps) {
             else nextType = 'training';
 
             next[weekIdx].days[dayIdx].type = nextType;
+            return next;
+        });
+    };
+
+    const setBulkWeekType = (weekIdx: number, type: DayType) => {
+        setWeeksData(prev => {
+            const next = [...prev];
+            next[weekIdx].days = next[weekIdx].days.map(d => ({ ...d, type }));
             return next;
         });
     };
@@ -103,9 +138,9 @@ export default function CreateView({ onBack }: CreateViewProps) {
     };
 
     return (
-        <div className="w-full h-[calc(100vh-5rem)] flex flex-col p-4 md:p-6 mx-auto rtl">
+        <div className="w-full h-[calc(100vh-5rem)] flex flex-col p-4 md:p-6 mx-auto rtl print:p-0 print:h-auto print:bg-white bg-transparent">
             {/* Top Bar matching Image 2 */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-4 mb-5 shrink-0 flex flex-col gap-4">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-4 mb-5 shrink-0 flex flex-col gap-4 print:hidden">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                     <button 
                         onClick={onBack}
@@ -231,12 +266,12 @@ export default function CreateView({ onBack }: CreateViewProps) {
 
             {/* Generated Weeks Area */}
             {hasGenerated ? (
-                <div className="flex-1 overflow-y-auto custom-scrollbar bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-4 md:p-6 mb-5 flex flex-col">
-                    <div className="text-center text-teal-600 dark:text-teal-400 font-bold mb-6 bg-teal-50 dark:bg-teal-900/20 py-2 rounded-xl border border-teal-100 dark:border-teal-900/50">
+                <div className="flex-1 overflow-y-auto custom-scrollbar bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-4 md:p-6 mb-5 flex flex-col print:border-none print:shadow-none print:p-0 print:overflow-visible">
+                    <div className="text-center flex justify-center items-center gap-4 text-teal-600 dark:text-teal-400 font-bold mb-6 bg-teal-50 dark:bg-teal-900/20 py-2 rounded-xl border border-teal-100 dark:border-teal-900/50 print:bg-transparent print:border-none print:text-black">
                         تم تحميل {weeksData.length} أسبوع بنجاح
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 pb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 pb-4 print:grid-cols-3 print:gap-2">
                         {weeksData.map((week, wIdx) => {
                             // Calculate week stats locally just for the UI header matching Image 4 (training/vacation/event counts)
                             let wT = 0, wV = 0, wE = 0;
@@ -247,48 +282,53 @@ export default function CreateView({ onBack }: CreateViewProps) {
                             });
 
                             return (
-                                <div key={wIdx} className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
-                                    <div className="bg-teal-600 dark:bg-teal-800 text-white text-center py-2.5 font-black text-sm relative">
+                                <div key={wIdx} className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col print:border-gray-800 print:break-inside-avoid">
+                                    <div className="bg-teal-600 dark:bg-teal-800 text-white text-center py-2.5 font-black text-sm relative print:bg-gray-100 print:text-black print:border-b print:border-gray-800">
                                         {getArabicWeekName(week.weekNumber)}
                                         {/* Optional date range subtitle */}
-                                        <div className="text-[10px] font-normal text-teal-100 mt-0.5" dir="ltr">
+                                        <div className="text-[10px] font-normal text-teal-100 mt-0.5 print:text-gray-700" dir="ltr">
                                             {formatDateOnly(week.startDate)} - {formatDateOnly(week.endDate)}
                                         </div>
                                     </div>
                                     
                                     {/* Stats for the week - Optional visually, but nice to map Image 4 */}
-                                    <div className="flex text-[10px] text-white p-1 gap-1 font-bold">
-                                        <div className="flex-1 bg-emerald-500 rounded text-center py-1">تدريب {wT}</div>
-                                        <div className="flex-1 bg-cyan-500 rounded text-center py-1">إجازة {wV}</div>
-                                        <div className="flex-1 bg-teal-400 rounded text-center py-1">مناسبة {wE}</div>
+                                    <div className="flex text-[10px] text-white p-1 gap-1 font-bold print:hidden">
+                                        <div className="flex-1 bg-emerald-500 rounded text-center py-1 cursor-pointer hover:bg-emerald-600 transition" onClick={() => setBulkWeekType(wIdx, 'training')} title="تحديد كامل الأسبوع للتدريب">تدريب {wT}</div>
+                                        <div className="flex-1 bg-cyan-500 rounded text-center py-1 cursor-pointer hover:bg-cyan-600 transition" onClick={() => setBulkWeekType(wIdx, 'vacation')} title="تحديد كامل الأسبوع كإجازة">إجازة {wV}</div>
+                                        <div className="flex-1 bg-teal-400 rounded text-center py-1 cursor-pointer hover:bg-teal-500 transition" onClick={() => setBulkWeekType(wIdx, 'event')} title="مجموعة مناسبات">مناسبة {wE}</div>
                                     </div>
 
-                                    <div className="flex-1 flex flex-col p-2 gap-1 bg-gray-50/50 dark:bg-slate-800/50">
+                                    <div className="flex-1 flex flex-col p-2 gap-1 bg-gray-50/50 dark:bg-slate-800/50 print:bg-white print:gap-0">
                                         {week.days.map((day, dIdx) => (
                                             <div 
                                                 key={dIdx} 
                                                 onClick={() => toggleDayType(wIdx, dIdx)}
-                                                className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-700/50 border border-gray-100 dark:border-slate-600/50 hover:border-teal-300 dark:hover:border-teal-500/50 cursor-pointer transition-colors group"
+                                                className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-700/50 border border-gray-100 dark:border-slate-600/50 hover:border-teal-300 dark:hover:border-teal-500/50 cursor-pointer transition-colors group print:border-b print:border-gray-200 print:rounded-none"
                                             >
                                                 <div className="flex items-center gap-3">
-                                                    <span className={`text-xs font-bold w-14 ${
+                                                    <span className={`text-xs font-bold w-14 print:text-black ${
                                                         day.type === 'training' ? 'text-gray-700 dark:text-gray-200' : 
                                                         day.type === 'vacation' ? 'text-cyan-600 dark:text-cyan-400' :
                                                         'text-teal-600 dark:text-teal-400'
                                                     }`}>
                                                         {arabicWeekDays[day.dayOfWeek]}
                                                     </span>
-                                                    <span className="text-[11px] text-gray-400 dark:text-gray-500 select-none font-mono" dir="ltr">
-                                                        {formatDateOnly(day.date).substring(5)}
-                                                    </span>
+                                                    <div className="flex flex-col text-right">
+                                                        <span className="text-[11px] text-gray-500 font-mono print:text-gray-800" dir="ltr">
+                                                            {formatDateOnly(day.date).substring(5)}
+                                                        </span>
+                                                        <span className="text-[9.5px] text-gray-400 font-mono print:text-gray-500" dir="rtl">
+                                                            {getHijriDate(day.date)}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                                 <div className="shrink-0 flex items-center justify-center">
                                                     {day.type === 'training' ? (
-                                                        <CheckCircle2 size={18} className="text-blue-600 dark:text-blue-500 drop-shadow-sm" />
+                                                        <CheckCircle2 size={18} className="text-blue-600 dark:text-blue-500 drop-shadow-sm print:text-black" />
                                                     ) : day.type === 'vacation' ? (
-                                                        <CheckCircle2 size={18} className="text-cyan-500 drop-shadow-sm" />
+                                                        <CheckCircle2 size={18} className="text-cyan-500 drop-shadow-sm print:text-gray-500" />
                                                     ) : (
-                                                        <CheckCircle2 size={18} className="text-teal-400 drop-shadow-sm" />
+                                                        <CheckCircle2 size={18} className="text-teal-400 drop-shadow-sm print:text-gray-500" />
                                                     )}
                                                 </div>
                                             </div>
@@ -306,21 +346,31 @@ export default function CreateView({ onBack }: CreateViewProps) {
             )}
 
             {/* Bottom Actions */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-4 shrink-0 flex items-center justify-between">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-4 shrink-0 flex items-center justify-between print:hidden">
                 <button 
                     onClick={onBack}
                     className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold transition-all shadow-md shadow-rose-600/20 text-sm"
                 >
                     إغلاق
                 </button>
-                <button 
-                    onClick={handleSave}
-                    disabled={isSubmitting || !hasGenerated}
-                    className="flex items-center gap-2 px-8 py-2.5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold transition-all shadow-md shadow-teal-500/20 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    {isSubmitting ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
-                    حفظ التقويم
-                </button>
+                <div className="flex gap-3">
+                    {hasGenerated && (
+                        <button 
+                            onClick={() => window.print()}
+                            className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition-all text-sm border border-gray-200 dark:border-slate-700"
+                        >
+                            <Printer size={16} /> طباعة
+                        </button>
+                    )}
+                    <button 
+                        onClick={handleSave}
+                        disabled={isSubmitting || !hasGenerated}
+                        className="flex items-center gap-2 px-8 py-2.5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold transition-all shadow-md shadow-teal-500/20 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isSubmitting ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
+                        حفظ التقويم
+                    </button>
+                </div>
             </div>
         </div>
     );

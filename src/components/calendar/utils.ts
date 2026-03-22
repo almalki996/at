@@ -1,5 +1,5 @@
 import { addDays, eachDayOfInterval, startOfWeek, endOfWeek, isBefore, isAfter, format, parseISO } from 'date-fns';
-import { CalendarDay, CalendarWeek } from './types';
+import { CalendarDay, CalendarWeek, DayType } from './types';
 
 /**
  * Normalizes a date string to just 'YYYY-MM-DD'
@@ -16,6 +16,31 @@ export const formatDateOnly = (date: Date | string): string => {
 /**
  * Generates an array of weeks (Sun-Sat) between two dates.
  */
+export const getHijriDate = (dateStr: string): string => {
+    try {
+        const d = new Date(dateStr);
+        return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+            day: 'numeric',
+            month: 'numeric',
+        }).format(d);
+    } catch {
+        return "";
+    }
+}
+
+export const getHolidayType = (dateStr: string | Date): 'event' | null => {
+    try {
+        const d = new Date(dateStr);
+        const month = d.getMonth() + 1;
+        const day = d.getDate();
+        if (month === 2 && day === 22) return 'event'; // Foundation Day
+        if (month === 9 && day === 23) return 'event'; // National Day
+        return null;
+    } catch {
+        return null;
+    }
+}
+
 export const generateWeeks = (startDateStr: string, endDateStr: string, weekendDays: number[] = [5, 6]): CalendarWeek[] => {
     const start = new Date(startDateStr);
     const end = new Date(endDateStr);
@@ -42,12 +67,17 @@ export const generateWeeks = (startDateStr: string, endDateStr: string, weekendD
         // Default weekends to vacation, others to training
         const dayOfWeek = date.getDay();
         const isWeekend = weekendDays.includes(dayOfWeek);
+        const isHoliday = getHolidayType(date);
         
+        let targetType: DayType = 'training';
+        if (isOutOfRange) targetType = 'vacation';
+        else if (isHoliday) targetType = 'event';
+        else if (isWeekend) targetType = 'vacation';
+
         currentWeekDays.push({
             date: format(date, 'yyyy-MM-dd'),
             dayOfWeek,
-            // If out of range, it's virtually not part of the active period, maybe default to vacation or empty. We'll default to vacation outside range.
-            type: isOutOfRange ? 'vacation' : (isWeekend ? 'vacation' : 'training'),
+            type: targetType,
         });
 
         if (currentWeekDays.length === 7) {
