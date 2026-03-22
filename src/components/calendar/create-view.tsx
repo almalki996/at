@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { useCreate, useList } from "@refinedev/core";
+import { useReactToPrint } from "react-to-print";
 import { generateWeeks, calculateStats, getArabicWeekName, arabicWeekDays, formatDateOnly, getHijriDate } from "./utils";
 import { CalendarWeek, DayType, CalendarEvent } from "./types";
 import { ArrowRight, Calendar as CalendarIcon, Save, RefreshCw, CheckCircle2, Circle, CheckSquare, Printer } from "lucide-react";
@@ -24,6 +25,12 @@ export default function CreateView({ onBack }: CreateViewProps) {
     const [hasGenerated, setHasGenerated] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedWeekends, setSelectedWeekends] = useState<number[]>([5, 6]);
+    const contentRef = useRef<HTMLDivElement>(null);
+
+    const handlePrint = useReactToPrint({ 
+        contentRef,
+        documentTitle: 'التقويم_التدريبي',
+    });
     
     // Fetch existing calendars for overlap validation
     const { query: calendarsQuery } = useList<CalendarEvent>({
@@ -138,7 +145,7 @@ export default function CreateView({ onBack }: CreateViewProps) {
     };
 
     return (
-        <div className="w-full h-[calc(100vh-5rem)] flex flex-col p-4 md:p-6 mx-auto rtl print:p-0 print:h-auto print:bg-white bg-transparent">
+        <div className="w-full h-[calc(100vh-5rem)] flex flex-col p-4 md:p-6 mx-auto rtl print:p-0 print:h-auto print:bg-white bg-transparent" ref={contentRef}>
             {/* Top Bar matching Image 2 */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-4 mb-5 shrink-0 flex flex-col gap-4 print:hidden">
                 <div className="flex flex-wrap items-center justify-between gap-4">
@@ -356,7 +363,7 @@ export default function CreateView({ onBack }: CreateViewProps) {
                 <div className="flex gap-3">
                     {hasGenerated && (
                         <button 
-                            onClick={() => window.print()}
+                            onClick={() => handlePrint()}
                             className="flex items-center gap-2 px-6 py-2.5 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition-all text-sm border border-gray-200 dark:border-slate-700"
                         >
                             <Printer size={16} /> طباعة

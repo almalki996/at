@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useList, useUpdate, useDelete } from "@refinedev/core";
+import { useReactToPrint } from "react-to-print";
 import { calculateStats, getArabicWeekName, arabicWeekDays, formatDateOnly, getHijriDate } from "./utils";
 import { CalendarEvent, CalendarWeek, DayType } from "./types";
 import { ArrowRight, Save, X, Edit, Calendar as CalendarIcon, CalendarDays, CheckCircle2, GraduationCap, Tent, Globe, Printer, Trash2 } from "lucide-react";
@@ -17,6 +18,12 @@ export default function ListView({ onBack }: ListViewProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [localData, setLocalData] = useState<CalendarWeek[]>([]);
     const [isActive, setIsActive] = useState(true);
+    const contentRef = useRef<HTMLDivElement>(null);
+
+    const handlePrint = useReactToPrint({
+        contentRef,
+        documentTitle: 'عرض_التقويم_التدريبي',
+    });
 
     const { query } = useList<CalendarEvent>({
         resource: "calendar",
@@ -138,7 +145,7 @@ export default function ListView({ onBack }: ListViewProps) {
     }));
 
     return (
-        <div className="w-full h-[calc(100vh-5rem)] flex flex-col p-4 md:p-6 mx-auto rtl print:p-0 print:h-auto print:bg-white bg-transparent">
+        <div className="w-full h-[calc(100vh-5rem)] flex flex-col p-4 md:p-6 mx-auto rtl print:p-0 print:h-auto print:bg-white bg-transparent" ref={contentRef}>
             
             {/* Top Bar matching Image 4 */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-4 mb-5 shrink-0 flex flex-col xl:flex-row items-center justify-between gap-4 print:hidden">
@@ -180,7 +187,7 @@ export default function ListView({ onBack }: ListViewProps) {
                                         <Trash2 size={16} /> حذف
                                     </button>
                                     <button 
-                                        onClick={() => window.print()}
+                                        onClick={() => handlePrint()}
                                         className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl transition-all border border-gray-200 dark:border-slate-700 hidden sm:flex"
                                         title="طباعة التقويم"
                                     >
