@@ -15,7 +15,8 @@ import {
     Eye,
     ChevronDown,
     ListChecks,
-    CheckCircle
+    CheckCircle,
+    Settings2
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -95,6 +96,35 @@ export default function DepartmentsPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [filterDesignation, setFilterDesignation] = useState<string | number>("all");
     const [filterStatus, setFilterStatus] = useState<string>("all");
+    const [isColumnsMenuOpen, setIsColumnsMenuOpen] = useState(false);
+    const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
+        designation: true,
+        employee_job: true,
+        job_type: true,
+        structure_id: true,
+        job_description: true,
+        job_status: true
+    });
+
+    React.useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (!(event.target as Element).closest('.col-menu-btn') && !(event.target as Element).closest('.col-menu-content')) {
+                setIsColumnsMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const COLUMNS_DEF = [
+        { key: "designation", label: "الكادر الوظيفي" },
+        { key: "employee_job", label: "مسمى الوظيفة" },
+        { key: "job_type", label: "نوع الوظيفة" },
+        { key: "structure_id", label: "اسم القسم" },
+        { key: "job_description", label: "الوصف الوظيفي" },
+        { key: "job_status", label: "الحالة" }
+    ];
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
@@ -435,11 +465,11 @@ export default function DepartmentsPage() {
 
                     <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 w-full xl:w-auto shrink-0">
                         {/* Status Filter */}
-                        <div className="w-full sm:w-36">
+                        <div className="w-full sm:w-36 shrink-0">
                             <select
                                 value={filterStatus}
                                 onChange={(e) => setFilterStatus(e.target.value)}
-                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200 text-gray-700 dark:text-slate-300"
+                                className="w-full bg-gray-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-900 dark:text-gray-300 text-sm rounded-xl focus:border-teal-500 py-2.5 px-4 outline-none transition-all"
                             >
                                 <option value="all">الكل (الحالة)</option>
                                 <option value="شاغرة">شاغرة</option>
@@ -448,11 +478,11 @@ export default function DepartmentsPage() {
                             </select>
                         </div>
                         {/* Designation Filter */}
-                        <div className="w-full sm:w-44">
+                        <div className="w-full sm:w-44 shrink-0">
                             <select
                                 value={filterDesignation}
                                 onChange={(e) => setFilterDesignation(e.target.value)}
-                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200 text-gray-700 dark:text-slate-300"
+                                className="w-full bg-gray-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-900 dark:text-gray-300 text-sm rounded-xl focus:border-teal-500 py-2.5 px-4 outline-none transition-all"
                             >
                                 <option value="all">الكل (الكادر)</option>
                                 {designations.map(d => (
@@ -461,20 +491,56 @@ export default function DepartmentsPage() {
                             </select>
                         </div>
                         {/* Search */}
-                        <div className="relative w-full sm:w-56">
+                        <div className="relative w-full sm:w-56 shrink-0">
                             <input
                                 type="text"
                                 placeholder="بحث..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-right dark:text-white transition-all duration-200"
+                                className="w-full bg-gray-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white text-sm rounded-xl focus:border-teal-500 py-2.5 pl-10 pr-4 outline-none transition-all"
                             />
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        </div>
+                        
+                        {/* Column Toggle Button */}
+                        <div className="relative z-40 shrink-0">
+                            <button 
+                                onClick={(e) => { e.stopPropagation(); setIsColumnsMenuOpen(!isColumnsMenuOpen); }}
+                                className="col-menu-btn flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl text-sm font-bold transition-all w-full md:w-auto outline-none"
+                            >
+                                <Settings2 size={16} />
+                                عرض الأعمدة
+                            </button>
+                            {isColumnsMenuOpen && (
+                                <div className="col-menu-content absolute rtl:right-0 ltr:left-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl z-[100] py-2 border border-gray-200 dark:border-slate-700 animate-in fade-in slide-in-from-top-2" onClick={(e) => e.stopPropagation()}>
+                                    <div className="px-4 py-2 border-b border-gray-50 dark:border-slate-700/50 mb-2">
+                                        <p className="text-xs font-bold text-gray-400">تخصيص أعمدة الجدول</p>
+                                    </div>
+                                    <div className="max-h-64 overflow-y-auto px-2 space-y-1 custom-scrollbar">
+                                        {COLUMNS_DEF.map(col => (
+                                            <label key={col.key} className="flex items-center gap-3 px-2 py-2 hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg cursor-pointer transition-colors group">
+                                                <div className="relative flex items-center justify-center shrink-0">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        className="hidden" 
+                                                        checked={!!visibleColumns[col.key]}
+                                                        onChange={() => setVisibleColumns(prev => ({...prev, [col.key]: !prev[col.key]}))}
+                                                    />
+                                                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${visibleColumns[col.key] ? 'bg-teal-500 border-teal-500' : 'bg-white dark:bg-slate-900 border-gray-300 dark:border-slate-600 group-hover:border-teal-400'}`}>
+                                                        {visibleColumns[col.key] && <Check size={14} className="text-white" />}
+                                                    </div>
+                                                </div>
+                                                <span className="text-sm font-bold text-gray-700 dark:text-slate-300 select-none truncate">{col.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <button
                             onClick={handleAdd}
-                            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-medium transition-colors w-full sm:w-auto shadow-sm shadow-teal-600/20"
+                            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-medium transition-colors w-full sm:w-auto shadow-sm shadow-teal-600/20 shrink-0"
                         >
                             <Plus size={18} />
                             إضافة وظيفة
@@ -502,11 +568,12 @@ export default function DepartmentsPage() {
                                     />
                                 </th>
                                 <th scope="col" className="px-6 py-4 text-center w-16">م</th>
-                                <th scope="col" className="px-6 py-4">الكادر الوظيفي</th>
-                                <th scope="col" className="px-6 py-4">مسمى الوظيفة</th>
-                                <th scope="col" className="px-6 py-4">نوع الوظيفة</th>
-                                <th scope="col" className="px-6 py-4">اسم القسم</th>
-                                <th scope="col" className="px-6 py-4">الوصف الوظيفي</th>
+                                {visibleColumns.designation && <th scope="col" className="px-6 py-4">الكادر الوظيفي</th>}
+                                {visibleColumns.employee_job && <th scope="col" className="px-6 py-4">مسمى الوظيفة</th>}
+                                {visibleColumns.job_type && <th scope="col" className="px-6 py-4">نوع الوظيفة</th>}
+                                {visibleColumns.structure_id && <th scope="col" className="px-6 py-4">اسم القسم</th>}
+                                {visibleColumns.job_description && <th scope="col" className="px-6 py-4">الوصف الوظيفي</th>}
+                                {visibleColumns.job_status && <th scope="col" className="px-6 py-4 text-center">الحالة</th>}
                                 <th scope="col" className="px-6 py-4 text-center">الإجراءات</th>
                             </tr>
                         </thead>
@@ -557,30 +624,51 @@ export default function DepartmentsPage() {
                                         <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 text-center font-medium text-gray-500 dark:text-slate-400">
                                             {index + 1}
                                         </td>
-                                        <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 text-gray-700 dark:text-slate-300">
-                                            {designationsMap.get(designationId)?.name || designationId}
-                                        </td>
-                                        <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 text-gray-700 dark:text-slate-300 font-medium">
-                                            {empData?.job_title || empId}
-                                        </td>
-                                        <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 text-gray-700 dark:text-slate-300">
-                                            {jobTypesMap.get(typeId)?.name || typeId}
-                                        </td>
-                                        <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 font-bold text-teal-700 dark:text-teal-400">
-                                            <div className="flex items-center gap-2">
-                                                <span>{structuresMap.get(structId)?.name || structId}</span>
-                                                {structuresMap.get(structId)?.is_active === false && (
-                                                    <span className="text-[10px] bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400 px-2 py-0.5 rounded-md font-bold shrink-0">
-                                                        موقوف
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 text-gray-500 dark:text-slate-400 text-xs">
-                                            <div className="line-clamp-2 max-w-xs leading-relaxed" title={empData?.job_description || "لا يوجد وصف"}>
-                                                {empData?.job_description || "لا يوجد وصف"}
-                                            </div>
-                                        </td>
+                                        {visibleColumns.designation && (
+                                            <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 text-gray-700 dark:text-slate-300">
+                                                {designationsMap.get(designationId)?.name || designationId}
+                                            </td>
+                                        )}
+                                        {visibleColumns.employee_job && (
+                                            <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 text-gray-700 dark:text-slate-300 font-medium">
+                                                {empData?.job_title || empId}
+                                            </td>
+                                        )}
+                                        {visibleColumns.job_type && (
+                                            <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 text-gray-700 dark:text-slate-300">
+                                                {jobTypesMap.get(typeId)?.name || typeId}
+                                            </td>
+                                        )}
+                                        {visibleColumns.structure_id && (
+                                            <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 font-bold text-teal-700 dark:text-teal-400">
+                                                <div className="flex items-center gap-2">
+                                                    <span>{structuresMap.get(structId)?.name || structId}</span>
+                                                    {structuresMap.get(structId)?.is_active === false && (
+                                                        <span className="text-[10px] bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400 px-2 py-0.5 rounded-md font-bold shrink-0">
+                                                            موقوف
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        )}
+                                        {visibleColumns.job_description && (
+                                            <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 text-gray-500 dark:text-slate-400 text-xs">
+                                                <div className="line-clamp-2 max-w-xs leading-relaxed" title={empData?.job_description || "لا يوجد وصف"}>
+                                                    {empData?.job_description || "لا يوجد وصف"}
+                                                </div>
+                                            </td>
+                                        )}
+                                        {visibleColumns.job_status && (
+                                            <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 text-center">
+                                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
+                                                    item.job_status === 'شاغرة' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                                                    item.job_status === 'مشغولة' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                                    'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
+                                                }`}>
+                                                    {item.job_status || "غير محدد"}
+                                                </span>
+                                            </td>
+                                        )}
                                         <td className="px-6 py-3">
                                             <div className="flex items-center justify-center gap-2">
                                                 <button

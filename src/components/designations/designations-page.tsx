@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useList, useCreate, useUpdate, useDelete, useDeleteMany } from "@refinedev/core";
+import { useList, useCreate, useUpdate, useDelete, useDeleteMany, useUpdateMany } from "@refinedev/core";
 import { 
     Plus, 
     Edit, 
@@ -11,11 +11,12 @@ import {
     Users,
     Check,
     Search,
-    AlertCircle,
     Eye,
     ChevronDown,
-    ListChecks
+    ListChecks,
+    Settings2
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 export interface Designation {
     id: number | string;
@@ -67,10 +68,29 @@ export default function DesignationsPage() {
     const [activeProperty, setActiveProperty] = useState<PropertyKey>("designations");
     const config = PROPERTY_TYPES[activeProperty];
     const resourceName = activeProperty;
-    
     const [searchQuery, setSearchQuery] = useState("");
     const [filterStatus, setFilterStatus] = useState<string>("all");
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isColumnsMenuOpen, setIsColumnsMenuOpen] = useState(false);
+    const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
+        name: true,
+        status: true
+    });
+
+    React.useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (!(event.target as Element).closest('.col-menu-btn') && !(event.target as Element).closest('.col-menu-content')) {
+                setIsColumnsMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const COLUMNS_DEF = [
+        { key: "name", label: config.label },
+        { key: "status", label: "الحالة" }
+    ];
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
@@ -180,13 +200,35 @@ export default function DesignationsPage() {
         deleteMany({
             resource: resourceName,
             ids: Array.from(selectedIds),
-            successNotification: () => ({ message: "تم الحذف الجماعي بنجاح", type: "success" })
+            successNotification: false,
+            errorNotification: false
         }, {
             onSuccess: () => {
+                toast.success("تم الحذف الجماعي بنجاح");
                 setSelectedIds(new Set());
                 setIsBulkDeleteModalOpen(false);
                 refetch?.();
-            }
+            },
+            onError: (err) => toast.error(err.message || "حدث خطأ")
+        });
+    };
+
+    const { mutate: updateMany } = useUpdateMany();
+
+    const handleBulkStatusUpdate = (isActive: boolean) => {
+        updateMany({
+            resource: resourceName,
+            ids: Array.from(selectedIds),
+            values: { is_active: isActive },
+            successNotification: false,
+            errorNotification: false
+        }, {
+            onSuccess: () => {
+                toast.success(`تم تغيير حالة ${selectedIds.size} سجل بنجاح`);
+                setSelectedIds(new Set());
+                refetch?.();
+            },
+            onError: (err) => toast.error(err.message || "حدث خطأ أثناء التحديث")
         });
     };
 
@@ -321,6 +363,42 @@ export default function DesignationsPage() {
                         />
                     </div>
                     
+                    {/* Column Toggle Button */}
+                    <div className="relative z-40 shrink-0">
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); setIsColumnsMenuOpen(!isColumnsMenuOpen); }}
+                            className="col-menu-btn flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl text-sm font-bold transition-all w-full md:w-auto outline-none"
+                        >
+                            <Settings2 size={16} />
+                            عرض الأعمدة
+                        </button>
+                        {isColumnsMenuOpen && (
+                            <div className="col-menu-content absolute rtl:right-0 ltr:left-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl z-[100] py-2 border border-gray-200 dark:border-slate-700 animate-in fade-in slide-in-from-top-2" onClick={(e) => e.stopPropagation()}>
+                                <div className="px-4 py-2 border-b border-gray-50 dark:border-slate-700/50 mb-2">
+                                    <p className="text-xs font-bold text-gray-400">تخصيص أعمدة الجدول</p>
+                                </div>
+                                <div className="max-h-64 overflow-y-auto px-2 space-y-1 custom-scrollbar">
+                                    {COLUMNS_DEF.map(col => (
+                                        <label key={col.key} className="flex items-center gap-3 px-2 py-2 hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg cursor-pointer transition-colors group">
+                                            <div className="relative flex items-center justify-center shrink-0">
+                                                <input 
+                                                    type="checkbox" 
+                                                    className="hidden" 
+                                                    checked={!!visibleColumns[col.key]}
+                                                    onChange={() => setVisibleColumns(prev => ({...prev, [col.key]: !prev[col.key]}))}
+                                                />
+                                                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${visibleColumns[col.key] ? 'bg-teal-500 border-teal-500' : 'bg-white dark:bg-slate-900 border-gray-300 dark:border-slate-600 group-hover:border-teal-400'}`}>
+                                                    {visibleColumns[col.key] && <Check size={14} className="text-white" />}
+                                                </div>
+                                            </div>
+                                            <span className="text-sm font-bold text-gray-700 dark:text-slate-300 select-none truncate">{col.label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    
                     <button 
                         onClick={handleAdd}
                         className="flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-bold text-teal-700 dark:text-teal-300 bg-teal-100 dark:bg-teal-900/30 hover:bg-teal-200 dark:hover:bg-teal-800/40 rounded-xl transition-all shadow-sm w-full sm:w-auto"
@@ -347,8 +425,8 @@ export default function DesignationsPage() {
                                     />
                                 </th>
                                 <th scope="col" className="px-4 py-4 w-12 text-center">م</th>
-                                <th scope="col" className="px-6 py-4">{config.label}</th>
-                                <th scope="col" className="px-6 py-4 w-32 text-center">الحالة</th>
+                                {visibleColumns.name && <th scope="col" className="px-6 py-4">{config.label}</th>}
+                                {visibleColumns.status && <th scope="col" className="px-6 py-4 w-32 text-center">الحالة</th>}
                                 <th scope="col" className="px-6 py-4 w-48 text-center">الإجراءات</th>
                             </tr>
                         </thead>
@@ -379,25 +457,29 @@ export default function DesignationsPage() {
                                             />
                                         </td>
                                         <td className="px-4 py-3 border-l border-gray-100 dark:border-slate-800/50 font-medium text-center">{index + 1}</td>
-                                        <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 font-bold text-teal-900 dark:text-teal-100 text-base">
-                                            {item.name}
-                                        </td>
-                                        <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50">
-                                            <div className="flex justify-center flex-col items-center gap-1">
-                                                <button 
-                                                    onClick={() => handleToggleActive(item)}
-                                                    className={`w-11 h-6 rounded-full transition-colors relative flex items-center shrink-0 border border-transparent outline-none ${item.is_active ? 'bg-emerald-500 hover:bg-emerald-600 dark:border-emerald-500/50' : 'bg-gray-300 dark:bg-slate-700 hover:bg-gray-400 dark:hover:bg-slate-600 dark:border-slate-600'}`}
-                                                    title={item.is_active ? "إلغاء التفعيل" : "تفعيل"}
-                                                >
-                                                    <div className={`shadow-sm w-4 h-4 bg-white rounded-full absolute transition-all flex items-center justify-center ${item.is_active ? 'right-6' : 'right-1'}`}>
-                                                        {item.is_active && <Check size={10} className="text-emerald-600" />}
-                                                    </div>
-                                                </button>
-                                                <span className={`text-[10px] font-bold ${item.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500'}`}>
-                                                    {item.is_active ? 'فعال' : 'غير فعال'}
-                                                </span>
-                                            </div>
-                                        </td>
+                                        {visibleColumns.name && (
+                                            <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 font-bold text-teal-900 dark:text-teal-100 text-base">
+                                                {item.name}
+                                            </td>
+                                        )}
+                                        {visibleColumns.status && (
+                                            <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50">
+                                                <div className="flex justify-center flex-col items-center gap-1">
+                                                    <button 
+                                                        onClick={() => handleToggleActive(item)}
+                                                        className={`w-11 h-6 rounded-full transition-colors relative flex items-center shrink-0 border border-transparent outline-none ${item.is_active ? 'bg-emerald-500 hover:bg-emerald-600 dark:border-emerald-500/50' : 'bg-gray-300 dark:bg-slate-700 hover:bg-gray-400 dark:hover:bg-slate-600 dark:border-slate-600'}`}
+                                                        title={item.is_active ? "إلغاء التفعيل" : "تفعيل"}
+                                                    >
+                                                        <div className={`shadow-sm w-4 h-4 bg-white rounded-full absolute transition-all flex items-center justify-center ${item.is_active ? 'right-6' : 'right-1'}`}>
+                                                            {item.is_active && <Check size={10} className="text-emerald-600" />}
+                                                        </div>
+                                                    </button>
+                                                    <span className={`text-[10px] font-bold ${item.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500'}`}>
+                                                        {item.is_active ? 'فعال' : 'غير فعال'}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        )}
                                         <td className="px-6 py-3">
                                             <div className="flex items-center justify-center gap-1.5">
                                                 <button 
@@ -642,6 +724,21 @@ export default function DesignationsPage() {
                         <div className="h-4 w-px bg-slate-700 hidden sm:block shrink-0"></div>
                         
                         <div className="flex flex-wrap items-center justify-center gap-2 shrink-0">
+                            <button
+                                onClick={() => handleBulkStatusUpdate(true)}
+                                className="px-3 py-1.5 text-xs sm:text-sm font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-xl transition-colors whitespace-nowrap"
+                            >
+                                تفعيل المحدد
+                            </button>
+                            <button
+                                onClick={() => handleBulkStatusUpdate(false)}
+                                className="px-3 py-1.5 text-xs sm:text-sm font-bold bg-slate-500/10 text-slate-300 hover:bg-slate-500/30 rounded-xl transition-colors whitespace-nowrap"
+                            >
+                                إيقاف المحدد
+                            </button>
+                            
+                            <div className="h-4 w-px bg-slate-700 mx-1 shrink-0"></div>
+                            
                             <button
                                 onClick={() => setIsBulkDeleteModalOpen(true)}
                                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-bold text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all whitespace-nowrap"

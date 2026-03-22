@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useList, useCreate, useUpdate, useDelete, useDeleteMany } from "@refinedev/core";
+import { useList, useCreate, useUpdate, useDelete, useDeleteMany, useUpdateMany } from "@refinedev/core";
 import { 
     Plus, 
     Edit, 
@@ -14,8 +14,10 @@ import {
     AlertCircle,
     Eye,
     ChevronDown,
-    ListChecks
+    ListChecks,
+    Settings2
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 export interface Employee {
     id: number | string;
@@ -34,7 +36,32 @@ export interface Designation {
 export default function EmployeesPage() {
     // State
     const [searchQuery, setSearchQuery] = useState("");
+    const [filterStatus, setFilterStatus] = useState<string>("all");
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isColumnsMenuOpen, setIsColumnsMenuOpen] = useState(false);
+    const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
+        designation: true,
+        job_title: true,
+        job_description: true,
+        status: true
+    });
+
+    React.useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (!(event.target as Element).closest('.col-menu-btn') && !(event.target as Element).closest('.col-menu-content')) {
+                setIsColumnsMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const COLUMNS_DEF = [
+        { key: "designation", label: "الكادر الوظيفي" },
+        { key: "job_title", label: "مسمى الوظيفة" },
+        { key: "job_description", label: "الوصف الوظيفي" },
+        { key: "status", label: "الحالة" }
+    ];
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
@@ -92,14 +119,21 @@ export default function EmployeesPage() {
     const items = useMemo(() => (listData?.data as unknown as Employee[]) || [], [listData?.data]);
     
     const filteredItems = useMemo(() => {
-        if (!searchQuery.trim()) return items;
-        const q = searchQuery.toLowerCase();
-        return items.filter(item => 
-            (item.job_title && item.job_title.toLowerCase().includes(q)) ||
-            (item.job_description && item.job_description.toLowerCase().includes(q)) ||
-            (item.designation && designationsMap.get(item.designation)?.toLowerCase().includes(q))
-        );
-    }, [items, searchQuery, designationsMap]);
+        let result = items;
+        if (filterStatus !== "all") {
+            const isActive = filterStatus === "active";
+            result = result.filter(item => item.is_active === isActive);
+        }
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            result = result.filter(item => 
+                (item.job_title && item.job_title.toLowerCase().includes(q)) ||
+                (item.job_description && item.job_description.toLowerCase().includes(q)) ||
+                (item.designation && designationsMap.get(item.designation)?.toLowerCase().includes(q))
+            );
+        }
+        return result;
+    }, [items, searchQuery, designationsMap, filterStatus]);
 
     // Handlers
     const handleAdd = () => {
@@ -164,13 +198,35 @@ export default function EmployeesPage() {
         deleteMany({
             resource: "Employees",
             ids: Array.from(selectedIds),
-            successNotification: () => ({ message: "تم الحذف الجماعي بنجاح", type: "success" })
+            successNotification: false,
+            errorNotification: false
         }, {
             onSuccess: () => {
+                toast.success("تم الحذف الجماعي بنجاح");
                 setSelectedIds(new Set());
                 setIsBulkDeleteModalOpen(false);
                 refetch?.();
-            }
+            },
+            onError: (err) => toast.error(err.message || "حدث خطأ أثناء الحذف")
+        });
+    };
+
+    const { mutate: updateMany } = useUpdateMany();
+
+    const handleBulkStatusUpdate = (isActive: boolean) => {
+        updateMany({
+            resource: "Employees",
+            ids: Array.from(selectedIds),
+            values: { is_active: isActive },
+            successNotification: false,
+            errorNotification: false
+        }, {
+            onSuccess: () => {
+                toast.success(`تم تغيير حالة ${selectedIds.size} سجل بنجاح`);
+                setSelectedIds(new Set());
+                refetch?.();
+            },
+            onError: (err) => toast.error(err.message || "حدث خطأ أثناء التحديث")
         });
     };
 
@@ -238,33 +294,71 @@ export default function EmployeesPage() {
                     </h1>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    {selectedIds.size > 0 && (
-                        <button 
-                            onClick={() => setIsBulkDeleteModalOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-900/30 hover:bg-rose-200 dark:hover:bg-rose-800/40 rounded-xl transition-all shadow-sm animate-in fade-in"
+                <div className="flex items-center gap-4 w-full md:w-auto mt-4 md:mt-0 flex-wrap xl:flex-nowrap justify-between xl:justify-end">
+                    <div className="w-full sm:w-36 shrink-0">
+                        <select
+                            value={filterStatus}
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                            className="w-full bg-gray-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-900 dark:text-gray-300 text-sm rounded-xl focus:border-teal-500 py-2.5 px-4 outline-none transition-all"
                         >
-                            <Trash2 size={16} />
-                            حذف المحدد ({selectedIds.size})
-                        </button>
-                    )}
+                            <option value="all">الكل (الحالة)</option>
+                            <option value="active">فعال</option>
+                            <option value="inactive">غير فعال</option>
+                        </select>
+                    </div>
                     
-                    <div className="relative w-full md:w-56">
+                    <div className="relative w-full sm:w-56 shrink-0">
                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                             <Search size={16} className="text-gray-400" />
                         </div>
                         <input 
                             type="text" 
-                            className="w-full bg-gray-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block pr-10 p-2.5 transition-all outline-none" 
+                            className="w-full bg-gray-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white text-sm rounded-xl focus:border-teal-500 block pr-10 py-2.5 outline-none transition-all placeholder:text-gray-400" 
                             placeholder="بحث..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
                     
+                    {/* Column Toggle Button */}
+                    <div className="relative z-40 shrink-0">
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); setIsColumnsMenuOpen(!isColumnsMenuOpen); }}
+                            className="col-menu-btn flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl text-sm font-bold transition-all w-full md:w-auto outline-none"
+                        >
+                            <Settings2 size={16} />
+                            عرض الأعمدة
+                        </button>
+                        {isColumnsMenuOpen && (
+                            <div className="col-menu-content absolute rtl:right-0 ltr:left-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl z-[100] py-2 border border-gray-200 dark:border-slate-700 animate-in fade-in slide-in-from-top-2" onClick={(e) => e.stopPropagation()}>
+                                <div className="px-4 py-2 border-b border-gray-50 dark:border-slate-700/50 mb-2">
+                                    <p className="text-xs font-bold text-gray-400">تخصيص أعمدة الجدول</p>
+                                </div>
+                                <div className="max-h-64 overflow-y-auto px-2 space-y-1 custom-scrollbar">
+                                    {COLUMNS_DEF.map(col => (
+                                        <label key={col.key} className="flex items-center gap-3 px-2 py-2 hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg cursor-pointer transition-colors group">
+                                            <div className="relative flex items-center justify-center shrink-0">
+                                                <input 
+                                                    type="checkbox" 
+                                                    className="hidden" 
+                                                    checked={!!visibleColumns[col.key]}
+                                                    onChange={() => setVisibleColumns(prev => ({...prev, [col.key]: !prev[col.key]}))}
+                                                />
+                                                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${visibleColumns[col.key] ? 'bg-teal-500 border-teal-500' : 'bg-white dark:bg-slate-900 border-gray-300 dark:border-slate-600 group-hover:border-teal-400'}`}>
+                                                    {visibleColumns[col.key] && <Check size={14} className="text-white" />}
+                                                </div>
+                                            </div>
+                                            <span className="text-sm font-bold text-gray-700 dark:text-slate-300 select-none truncate">{col.label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    
                     <button 
                         onClick={handleAdd}
-                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-teal-700 dark:text-teal-300 bg-teal-100 dark:bg-teal-900/30 hover:bg-teal-200 dark:hover:bg-teal-800/40 rounded-xl transition-all shadow-sm"
+                        className="flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-bold text-teal-700 dark:text-teal-300 bg-teal-100 dark:bg-teal-900/30 hover:bg-teal-200 dark:hover:bg-teal-800/40 rounded-xl transition-all shadow-sm w-full sm:w-auto shrink-0"
                     >
                         <Plus size={16} />
                         إضافة مسمى وظيفي
@@ -288,10 +382,10 @@ export default function EmployeesPage() {
                                     />
                                 </th>
                                 <th scope="col" className="px-4 py-4 w-12 text-center">م</th>
-                                <th scope="col" className="px-6 py-4 w-48">الكادر الوظيفي</th>
-                                <th scope="col" className="px-6 py-4 w-64">مسمى الوظيفة</th>
-                                <th scope="col" className="px-6 py-4 min-w-[300px]">الوصف الوظيفي</th>
-                                <th scope="col" className="px-6 py-4 w-28 text-center">الحالة</th>
+                                {visibleColumns.designation && <th scope="col" className="px-6 py-4 w-48">الكادر الوظيفي</th>}
+                                {visibleColumns.job_title && <th scope="col" className="px-6 py-4 w-64">مسمى الوظيفة</th>}
+                                {visibleColumns.job_description && <th scope="col" className="px-6 py-4 min-w-[300px]">الوصف الوظيفي</th>}
+                                {visibleColumns.status && <th scope="col" className="px-6 py-4 w-28 text-center">الحالة</th>}
                                 <th scope="col" className="px-6 py-4 w-36 text-center">الإجراءات</th>
                             </tr>
                         </thead>
@@ -322,37 +416,45 @@ export default function EmployeesPage() {
                                             />
                                         </td>
                                         <td className="px-4 py-3 border-l border-gray-100 dark:border-slate-800/50 font-medium text-center">{index + 1}</td>
-                                        <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 font-bold text-gray-800 dark:text-gray-200">
-                                            {item.designation ? (designationsMap.get(item.designation) || "غير معروف") : "-"}
-                                        </td>
-                                        <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 font-bold text-teal-900 dark:text-teal-100 text-base">
-                                            {item.job_title}
-                                        </td>
-                                        <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 text-gray-600 dark:text-gray-400">
-                                            {item.job_description ? (
-                                                <div className="line-clamp-2" title={item.job_description}>
-                                                    {item.job_description}
-                                                </div>
-                                            ) : (
-                                                <span className="text-gray-400 dark:text-gray-600 italic">لا يوجد وصف</span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50">
-                                            <div className="flex justify-center flex-col items-center gap-1">
-                                                <button 
-                                                    onClick={() => handleToggleActive(item)}
-                                                    className={`w-11 h-6 rounded-full transition-colors relative flex items-center shrink-0 border border-transparent outline-none ${item.is_active ? 'bg-emerald-500 hover:bg-emerald-600 dark:border-emerald-500/50' : 'bg-gray-300 dark:bg-slate-700 hover:bg-gray-400 dark:hover:bg-slate-600 dark:border-slate-600'}`}
-                                                    title={item.is_active ? "إلغاء التفعيل" : "تفعيل"}
-                                                >
-                                                    <div className={`shadow-sm w-4 h-4 bg-white rounded-full absolute transition-all flex items-center justify-center ${item.is_active ? 'right-6' : 'right-1'}`}>
-                                                        {item.is_active && <Check size={10} className="text-emerald-600" />}
+                                        {visibleColumns.designation && (
+                                            <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 font-bold text-gray-800 dark:text-gray-200">
+                                                {item.designation ? (designationsMap.get(item.designation) || "غير معروف") : "-"}
+                                            </td>
+                                        )}
+                                        {visibleColumns.job_title && (
+                                            <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 font-bold text-teal-900 dark:text-teal-100 text-base">
+                                                {item.job_title}
+                                            </td>
+                                        )}
+                                        {visibleColumns.job_description && (
+                                            <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50 text-gray-600 dark:text-gray-400">
+                                                {item.job_description ? (
+                                                    <div className="line-clamp-2" title={item.job_description}>
+                                                        {item.job_description}
                                                     </div>
-                                                </button>
-                                                <span className={`text-[10px] font-bold ${item.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500'}`}>
-                                                    {item.is_active ? 'فعال' : 'غير فعال'}
-                                                </span>
-                                            </div>
-                                        </td>
+                                                ) : (
+                                                    <span className="text-gray-400 dark:text-gray-600 italic">لا يوجد وصف</span>
+                                                )}
+                                            </td>
+                                        )}
+                                        {visibleColumns.status && (
+                                            <td className="px-6 py-3 border-l border-gray-100 dark:border-slate-800/50">
+                                                <div className="flex justify-center flex-col items-center gap-1">
+                                                    <button 
+                                                        onClick={() => handleToggleActive(item)}
+                                                        className={`w-11 h-6 rounded-full transition-colors relative flex items-center shrink-0 border border-transparent outline-none ${item.is_active ? 'bg-emerald-500 hover:bg-emerald-600 dark:border-emerald-500/50' : 'bg-gray-300 dark:bg-slate-700 hover:bg-gray-400 dark:hover:bg-slate-600 dark:border-slate-600'}`}
+                                                        title={item.is_active ? "إلغاء التفعيل" : "تفعيل"}
+                                                    >
+                                                        <div className={`shadow-sm w-4 h-4 bg-white rounded-full absolute transition-all flex items-center justify-center ${item.is_active ? 'right-6' : 'right-1'}`}>
+                                                            {item.is_active && <Check size={10} className="text-emerald-600" />}
+                                                        </div>
+                                                    </button>
+                                                    <span className={`text-[10px] font-bold ${item.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500'}`}>
+                                                        {item.is_active ? 'فعال' : 'غير فعال'}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        )}
                                         <td className="px-6 py-3">
                                             <div className="flex items-center justify-center gap-1.5">
                                                 <button 
@@ -633,6 +735,51 @@ export default function EmployeesPage() {
                                 className="flex-1 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 font-bold py-3.5 px-4 rounded-xl border-2 border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all active:scale-95"
                             >
                                 إلغاء الأمر
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Bottom Floating Bulk Actions Bar */}
+            {selectedIds.size > 0 && (
+                <div className="fixed bottom-0 left-0 right-0 transform flex justify-center z-50 pointer-events-none mb-6 transition-all duration-300 animate-in slide-in-from-bottom-5">
+                    <div className="bg-slate-800 dark:bg-slate-900 pointer-events-auto rounded-2xl shadow-2xl p-2 sm:p-3 flex flex-wrap items-center justify-center gap-2 sm:gap-4 border border-slate-700 mx-4 sm:mx-0 max-w-[95vw] shadow-black/50 overflow-x-auto custom-scrollbar">
+                        <div className="flex items-center gap-2 text-white font-bold px-2 sm:px-4 text-sm shrink-0">
+                            <Check size={18} className="text-teal-400 hidden sm:block shrink-0" />
+                            <span className="whitespace-nowrap">تم تحديد {selectedIds.size} وظيفة</span>
+                        </div>
+                        
+                        <div className="h-4 w-px bg-slate-700 hidden sm:block shrink-0"></div>
+                        
+                        <div className="flex flex-wrap items-center justify-center gap-2 shrink-0">
+                            <button
+                                onClick={() => handleBulkStatusUpdate(true)}
+                                className="px-3 py-1.5 text-xs sm:text-sm font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-xl transition-colors whitespace-nowrap"
+                            >
+                                تفعيل المحدد
+                            </button>
+                            <button
+                                onClick={() => handleBulkStatusUpdate(false)}
+                                className="px-3 py-1.5 text-xs sm:text-sm font-bold bg-slate-500/10 text-slate-300 hover:bg-slate-500/30 rounded-xl transition-colors whitespace-nowrap"
+                            >
+                                إيقاف المحدد
+                            </button>
+                            
+                            <div className="h-4 w-px bg-slate-700 mx-1 shrink-0"></div>
+                            
+                            <button
+                                onClick={() => setIsBulkDeleteModalOpen(true)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-bold text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all whitespace-nowrap"
+                            >
+                                <Trash2 size={16} /> <span className="hidden sm:inline">حذف المحدد</span>
+                            </button>
+                            <div className="h-4 w-px bg-slate-700 hidden sm:block mx-1 shrink-0"></div>
+                            <button
+                                onClick={() => setSelectedIds(new Set())}
+                                className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl transition-colors shrink-0"
+                                title="إلغاء التحديد"
+                            >
+                                <X size={20} />
                             </button>
                         </div>
                     </div>

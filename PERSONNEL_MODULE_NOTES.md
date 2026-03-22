@@ -23,4 +23,7 @@
 ## 5. Fetching & Hooks
 - Native `fetch` is forbidden. The module exclusively uses `@refinedev/core` (`useList`, `useUpdate`, `useDelete`, `useUpdateMany`, etc.).
 
+## 6. Ported Features
+- Originally exclusive to Personnel, the `Column Visibility Toggle` (using an absolute positioned dropdown) and the **Floating Bulk Actions Bar** (with Status toggles and Delete actions) have been adopted as project-wide standard UX patterns. When building new advanced tables, replicate this consistent design language.
+
 **Note to newly instantiated AI Agent**: When picking up work on the Personnel Module, respect these components and do not revert the custom `RelationSelect` or `DatePickerField` to standard inputs, and retain the separated file structure.
