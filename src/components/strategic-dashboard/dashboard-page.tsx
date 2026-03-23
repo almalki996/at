@@ -8,17 +8,35 @@ import {
 
 export default function DashboardPage() {
     // 1. Fetch all data
-    const { data: plansData, isLoading: isPlansLoading } = useList({ resource: "strategic_plans", pagination: { mode: "off" } as any });
-    const { data: stratObjRaw, isLoading: isStratObjLoading } = useList({ resource: "strategic_objectives", pagination: { mode: "off" } as any });
-    const { data: opObjRaw, isLoading: isOpObjLoading } = useList({ resource: "operational_objectives", pagination: { mode: "off" } as any });
-    const { data: kpisRaw, isLoading: isKpisLoading } = useList({ resource: "kpis", pagination: { mode: "off" } as any });
-    const { data: initiativesRaw, isLoading: isInitLoading } = useList({ resource: "initiatives", pagination: { mode: "off" } as any });
-    const { data: mechRaw, isLoading: isMechLoading } = useList({ resource: "implementation_mechanisms", pagination: { mode: "off" } as any });
+    const { query: plansQuery } = useList({ resource: "strategic_plans", pagination: { mode: "off" } as any });
+    const { query: stratObjQuery } = useList({ resource: "strategic_objectives", pagination: { mode: "off" } as any });
+    const { query: opObjQuery } = useList({ resource: "operational_objectives", pagination: { mode: "off" } as any });
+    const { query: kpisQuery } = useList({ resource: "kpis", pagination: { mode: "off" } as any });
+    const { query: initiativesQuery } = useList({ resource: "initiatives", pagination: { mode: "off" } as any });
+    const { query: mechQuery } = useList({ resource: "implementation_mechanisms", pagination: { mode: "off" } as any });
     
     // Relations lookups
-    const { data: structuresRaw } = useList({ resource: "Structures", pagination: { mode: "off" } as any });
-    const { data: departmentsRaw } = useList({ resource: "Departments", pagination: { mode: "off" } as any });
-    const { data: personnelRaw } = useList({ resource: "Personnel", pagination: { mode: "off" } as any });
+    const { query: structuresQuery } = useList({ resource: "Structures", pagination: { mode: "off" } as any });
+    const { query: departmentsQuery } = useList({ resource: "Departments", pagination: { mode: "off" } as any });
+    const { query: personnelQuery } = useList({ resource: "Personnel", pagination: { mode: "off" } as any });
+
+    const plansData = plansQuery?.data;
+    const stratObjRaw = stratObjQuery?.data;
+    const opObjRaw = opObjQuery?.data;
+    const kpisRaw = kpisQuery?.data;
+    const initiativesRaw = initiativesQuery?.data;
+    const mechRaw = mechQuery?.data;
+
+    const structuresRaw = structuresQuery?.data;
+    const departmentsRaw = departmentsQuery?.data;
+    const personnelRaw = personnelQuery?.data;
+
+    const isPlansLoading = plansQuery?.isLoading;
+    const isStratObjLoading = stratObjQuery?.isLoading;
+    const isOpObjLoading = opObjQuery?.isLoading;
+    const isKpisLoading = kpisQuery?.isLoading;
+    const isInitLoading = initiativesQuery?.isLoading;
+    const isMechLoading = mechQuery?.isLoading;
 
     const plans = plansData?.data || [];
     const stratObjs = stratObjRaw?.data || [];
