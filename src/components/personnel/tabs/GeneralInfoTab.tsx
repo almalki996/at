@@ -13,11 +13,13 @@ interface GeneralInfoTabProps {
 export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({ formData, setFormData, jobs, structures, departments }) => {
     
     // Find current matched vacancy (if editing an existing employee)
+    const currentVacancyId = typeof formData.vacancy_id === 'object' ? formData.vacancy_id?.id : formData.vacancy_id;
     const currentDepId = typeof formData.department_id === 'object' ? formData.department_id?.id : formData.department_id;
     const currentJobId = typeof formData.primary_job_id === 'object' ? formData.primary_job_id?.id : formData.primary_job_id;
     
     // Attempt to locate a matching vacancy in departments list
     const selectedVacancy = departments.find(d => {
+        if (currentVacancyId) return d.id === currentVacancyId;
         const dStructId = typeof d.structure_id === 'object' ? d.structure_id?.id : d.structure_id;
         const dJobId = typeof d.employee_job === 'object' ? d.employee_job?.id : d.employee_job;
         return dStructId === currentDepId && dJobId === currentJobId;
@@ -37,7 +39,7 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({ formData, setFor
             
             return {
                 value: d.id,
-                label: `${jobName || 'بدون مسمى'} في ${structName || 'بدون قسم'} ${d.id === selectedVacancy?.id ? '(الحالي)' : ''}`
+                label: `${jobName || 'بدون مسمى'} في ${structName || 'بدون قسم'} (رقم الشاغر #${d.id}) ${d.id === selectedVacancy?.id ? '(الحالي)' : ''}`
             };
         });
 
@@ -48,12 +50,14 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({ formData, setFor
             const dJobId = typeof vac.employee_job === 'object' ? vac.employee_job?.id : vac.employee_job;
             setFormData({
                 ...formData,
+                vacancy_id: vac.id,
                 department_id: dStructId,
                 primary_job_id: dJobId
             });
         } else {
             setFormData({
                 ...formData,
+                vacancy_id: null,
                 department_id: null,
                 primary_job_id: null
             });

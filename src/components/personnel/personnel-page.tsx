@@ -615,6 +615,7 @@ export default function PersonnelPage() {
                 onClose={() => setIsEditModalOpen(false)}
                 itemToEdit={itemToEdit}
                 onSuccess={refetch}
+                onCreated={(newItem) => setItemToEdit(newItem)}
                 jobs={jobs}
                 departmentsList={departmentsList}
                 assignmentsList={assignmentsList}

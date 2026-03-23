@@ -11,6 +11,7 @@ interface PersonnelEditModalProps {
     onClose: () => void;
     itemToEdit: any;
     onSuccess: () => void;
+    onCreated?: (item: any) => void;
     jobs: any[];
     departmentsList: any[];
     assignmentsList: any[];
@@ -30,6 +31,7 @@ export const PersonnelEditModal: React.FC<PersonnelEditModalProps> = ({
     onClose,
     itemToEdit,
     onSuccess,
+    onCreated,
     jobs,
     departmentsList,
     assignmentsList,
@@ -52,11 +54,11 @@ export const PersonnelEditModal: React.FC<PersonnelEditModalProps> = ({
 
     useEffect(() => {
         if (isOpen) {
-            setEditTab("general");
             if (itemToEdit) {
                 setFormData({ ...itemToEdit });
             } else {
                 setFormData({});
+                setEditTab("general");
             }
         }
     }, [isOpen, itemToEdit]);
@@ -69,6 +71,20 @@ export const PersonnelEditModal: React.FC<PersonnelEditModalProps> = ({
 
         setIsSubmitting(true);
         const { id, date_created, date_updated, status, user_created, user_updated, ...payload } = formData;
+        
+        const handleVacancyStatus = (newVacancyId: any, oldVacancyId: any) => {
+            const newId = typeof newVacancyId === 'object' ? newVacancyId?.id : newVacancyId;
+            const oldId = typeof oldVacancyId === 'object' ? oldVacancyId?.id : oldVacancyId;
+
+            if (newId != oldId) {
+                if (newId) {
+                    updateRecord({ resource: "Departments", id: newId, values: { job_status: 'مشغولة' }, successNotification: false, errorNotification: false });
+                }
+                if (oldId) {
+                    updateRecord({ resource: "Departments", id: oldId, values: { job_status: 'شاغرة' }, successNotification: false, errorNotification: false });
+                }
+            }
+        };
         
         // Ensure strictly required numeric fields or related fields are integers or nulls, etc if needed.
         if (payload.primary_job_id && typeof payload.primary_job_id === 'object') {
@@ -84,6 +100,7 @@ export const PersonnelEditModal: React.FC<PersonnelEditModalProps> = ({
                 errorNotification: false
             }, {
                 onSuccess: () => {
+                    handleVacancyStatus(payload.vacancy_id, itemToEdit.vacancy_id);
                     toast.success("تم تحديث بيانات الموظف بنجاح🎉");
                     onSuccess();
                     onClose();
@@ -97,10 +114,16 @@ export const PersonnelEditModal: React.FC<PersonnelEditModalProps> = ({
                 successNotification: false,
                 errorNotification: false
             }, {
-                onSuccess: () => {
+                onSuccess: (data: any) => {
+                    handleVacancyStatus(payload.vacancy_id, null);
                     toast.success("تم إضافة الموظف بنجاح🎉");
                     onSuccess();
-                    onClose();
+                    if (data?.data) {
+                        setEditTab("assignments");
+                        if (onCreated) onCreated(data.data);
+                    } else {
+                        onClose();
+                    }
                 },
                 onError: (error) => toast.error(error.message || "حدث خطأ أثناء الإضافة")
             });
@@ -132,27 +155,31 @@ export const PersonnelEditModal: React.FC<PersonnelEditModalProps> = ({
                     </button>
                 </div>
 
-                <div className="p-6 overflow-y-auto custom-scrollbar bg-gray-50/30 dark:bg-slate-900/50 flex flex-col gap-6">
-                    <div className="flex bg-gray-100 dark:bg-slate-800/50 p-1 rounded-xl w-fit max-w-full overflow-x-auto custom-scrollbar border border-gray-200 dark:border-slate-700">
+                <div className="px-6 py-3 border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50 shrink-0 overflow-x-auto custom-scrollbar">
+                    <div className="flex bg-white dark:bg-slate-800 p-1 rounded-xl w-fit max-w-full border border-gray-200 dark:border-slate-700 shadow-sm">
                         <button
                             onClick={() => setEditTab("general")}
-                            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${editTab === "general" ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200'}`}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${editTab === "general" ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 shadow-sm' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700/50'}`}
                         >
                             <FileText size={16} /> أساسية
                         </button>
                         <button
                             onClick={() => setEditTab("assignments")}
-                            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${editTab === "assignments" ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200'}`}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${editTab === "assignments" ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 shadow-sm' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700/50'}`}
                         >
                             <Briefcase size={16} /> تكليفات
                         </button>
                         <button
                             onClick={() => setEditTab("qualifications")}
-                            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${editTab === "qualifications" ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200'}`}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${editTab === "qualifications" ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 shadow-sm' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700/50'}`}
                         >
                             <Award size={16} /> دورات
                         </button>
                     </div>
+                </div>
+
+                <div className="p-6 overflow-y-auto custom-scrollbar bg-gray-50/30 dark:bg-slate-900/50 flex flex-col gap-6 flex-1">
+
 
                     <div className="flex-1 min-h-[400px]">
                         {editTab === "general" && (

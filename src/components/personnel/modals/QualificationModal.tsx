@@ -116,7 +116,7 @@ export const QualificationModal: React.FC<QualificationModalProps> = ({ isOpen, 
                 if (e.target === e.currentTarget && !isSubmitting) onClose();
             }}
         >
-            <div className="bg-slate-800 dark:bg-slate-900 rounded-xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-700">
+            <div className="bg-slate-800 dark:bg-slate-900 rounded-xl shadow-xl w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-700">
                 <div className="px-6 py-4 bg-slate-800 flex items-center justify-between shrink-0">
                     <h3 className="text-lg font-bold text-white">تأهيل جديد</h3>
                     <button onClick={() => !isSubmitting && onClose()} className="text-slate-400 hover:text-white transition-colors">
@@ -125,7 +125,7 @@ export const QualificationModal: React.FC<QualificationModalProps> = ({ isOpen, 
                 </div>
                 
                 <form onSubmit={handleSubmit(onSubmit)} className="contents">
-                    <div className="p-6 bg-white dark:bg-slate-900 overflow-y-auto space-y-4">
+                    <div className="p-6 bg-white dark:bg-slate-900 overflow-y-auto flex-1 custom-scrollbar space-y-4">
                         <div className="flex flex-col gap-2">
                             <label className="text-sm font-bold text-gray-700 dark:text-gray-300">اسم الدورة <span className="text-red-500">*</span></label>
                             <input 

@@ -280,7 +280,8 @@ export default function StructuresTreePage() {
         deleteMany({
             resource: resourceName,
             ids: allIdsToDelete,
-            successNotification: () => ({ message: "تم الحذف مع كافة الأقسام الفرعية التابعة بنجاح", type: "success" })
+            successNotification: () => ({ message: "تم الحذف مع كافة الأقسام الفرعية التابعة بنجاح", type: "success" }),
+            errorNotification: () => ({ message: "فشل الحذف. يرجى التأكد من عدم وجود بيانات (وظائف/موظفين) مرتبطة بهذه الأقسام", type: "error" })
         }, {
             onSuccess: () => {
                 setSelectedIds(new Set());
@@ -327,7 +328,8 @@ export default function StructuresTreePage() {
         deleteMany({
             resource: resourceName,
             ids: allIdsToDelete,
-            successNotification: () => ({ message: "تم الحذف مع كافة الأقسام الفرعية التابعة بنجاح", type: "success" })
+            successNotification: () => ({ message: "تم الحذف مع كافة الأقسام الفرعية التابعة بنجاح", type: "success" }),
+            errorNotification: () => ({ message: "فشل الحذف. يرجى التأكد من عدم وجود بيانات (وظائف/موظفين) مرتبطة بهذا القسم", type: "error" })
         }, {
             onSuccess: () => {
                 refetch?.();

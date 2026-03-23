@@ -30,4 +30,15 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export const directusDataProvider = dataProvider(API_URL, axiosInstance);
+const baseProvider = dataProvider(API_URL, axiosInstance);
+
+export const directusDataProvider = {
+    ...baseProvider,
+    deleteMany: async ({ resource, ids, variables, meta }: any) => {
+        const response = await axiosInstance.delete(`/${resource}`, {
+            baseURL: API_URL,
+            data: ids
+        });
+        return { data: response.data?.data || [] };
+    }
+};

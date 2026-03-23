@@ -70,6 +70,42 @@ export function RefineProvider({ children }: { children: React.ReactNode }) {
             name: "Employee_Assignments",
             meta: { hide: true }
           },
+          // Phase 4 - Strategic Cascade
+          {
+            name: "strategic_plans",
+            list: "/strategic_plans",
+            meta: { label: "الخطة الاستراتيجية", icon: "Flag", hide: true }
+          },
+          {
+            name: "strategic_objectives",
+            list: "/strategic_objectives",
+            meta: { label: "الأهداف الاستراتيجية", icon: "Target", hide: true } // Hide sub-levels from main menu by default, user can add via Menu Builder
+          },
+          {
+            name: "operational_objectives",
+            list: "/operational_objectives",
+            meta: { label: "الأهداف التشغيلية", icon: "Activity", hide: true }
+          },
+          {
+            name: "kpis",
+            list: "/kpis",
+            meta: { label: "مؤشرات الأداء", icon: "TrendingUp", hide: true }
+          },
+          {
+            name: "initiatives",
+            list: "/initiatives",
+            meta: { label: "المبادرات", icon: "Lightbulb", hide: true }
+          },
+          {
+            name: "implementation_mechanisms",
+            list: "/implementation_mechanisms",
+            meta: { label: "آليات التنفيذ", icon: "Wrench", hide: true }
+          },
+          {
+            name: "strategic_dashboard",
+            list: "/strategic-dashboard",
+            meta: { label: "استعراض الهرم الاستراتيجي", icon: "Network", hide: true }
+          },
           /* Removed Categories and Jobs per User request */
         ]}
         options={{

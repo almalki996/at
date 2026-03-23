@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Check, Paperclip, X } from "lucide-react";
 import { useForm } from "@refinedev/react-hook-form";
+import { useUpdate } from "@refinedev/core";
 import toast from "react-hot-toast";
 import { uploadFile } from "../utils";
 import { CustomSelect } from "../CustomSelect";
@@ -30,6 +31,22 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
     const [file, setFile] = useState<File | null>(null);
     const [removedAttachment, setRemovedAttachment] = useState(false);
     const [uploadingState, setUploadingState] = useState(false);
+    
+    const { mutate: updateVacancyStatus } = useUpdate();
+
+    const handleVacancyStatus = (newVacancyId: any, oldVacancyId: any) => {
+        const newId = typeof newVacancyId === 'object' ? newVacancyId?.id : newVacancyId;
+        const oldId = typeof oldVacancyId === 'object' ? oldVacancyId?.id : oldVacancyId;
+
+        if (newId != oldId) {
+            if (newId) {
+                updateVacancyStatus({ resource: "Departments", id: newId, values: { job_status: 'مشغولة' }, successNotification: false, errorNotification: false });
+            }
+            if (oldId) {
+                updateVacancyStatus({ resource: "Departments", id: oldId, values: { job_status: 'شاغرة' }, successNotification: false, errorNotification: false });
+            }
+        }
+    };
 
     const { 
         register, 
@@ -48,12 +65,13 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
             redirect: false,
             successNotification: false,
             errorNotification: false,
-            onMutationSuccess: () => {
+            onMutationSuccess: (data: any, variables: any) => {
+                handleVacancyStatus(variables.vacancy_id, initialData?.vacancy_id);
                 toast.success(initialData ? "تم تعديل التكليف بنجاح" : "تم التكليف بنجاح");
                 onSuccess();
                 onClose();
             },
-            onMutationError: (error) => {
+            onMutationError: (error: any) => {
                 toast.error(error?.message || "حدث خطأ في قيد التكليف");
             }
         }
@@ -69,6 +87,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     decision_number: initialData.decision_number,
                     decision_summary: initialData.decision_summary,
                     decision_source: initialData.decision_source,
+                    vacancy_id: typeof initialData.vacancy_id === 'object' ? initialData.vacancy_id?.id : initialData.vacancy_id,
                     department_id: typeof initialData.department_id === 'object' ? initialData.department_id?.id : initialData.department_id,
                     job_id: typeof initialData.job_id === 'object' ? initialData.job_id?.id : initialData.job_id,
                     decision_date: initialData.decision_date?.split('T')[0] || "",
@@ -76,7 +95,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     effective_to: initialData.effective_to?.split('T')[0] || ""
                 });
             } else {
-                reset({ subject: "", decision_number: "", decision_summary: "", decision_source: "", department_id: "", job_id: "", decision_date: "", effective_from: "", effective_to: "" });
+                reset({ subject: "", decision_number: "", decision_summary: "", decision_source: "", vacancy_id: "", department_id: "", job_id: "", decision_date: "", effective_from: "", effective_to: "" });
             }
         }
     }, [isOpen, initialData, reset]);
@@ -118,10 +137,12 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
     if (!isOpen) return null;
     const isSubmitting = formLoading || uploadingState;
 
+    const currentVacancyId = watch("vacancy_id");
     const currentDepId = watch("department_id");
     const currentJobId = watch("job_id");
 
     const selectedVacancy = departments.find(d => {
+        if (currentVacancyId) return d.id === currentVacancyId;
         const dStructId = typeof d.structure_id === 'object' ? d.structure_id?.id : d.structure_id;
         const dJobId = typeof d.employee_job === 'object' ? d.employee_job?.id : d.employee_job;
         return dStructId === currentDepId && dJobId === currentJobId;
@@ -134,7 +155,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
             const jobName = typeof d.employee_job === 'object' ? d.employee_job?.job_title : jobs.find(j => j.id === d.employee_job)?.job_title;
             return {
                 value: d.id,
-                label: `${jobName || 'بدون مسمى'} في ${structName || 'بدون قسم'} ${d.id === selectedVacancy?.id ? '(الحالي)' : ''}`
+                label: `${jobName || 'بدون مسمى'} في ${structName || 'بدون قسم'} (رقم الشاغر #${d.id}) ${d.id === selectedVacancy?.id ? '(الحالي)' : ''}`
             };
         });
 
@@ -143,9 +164,11 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
         if (vac) {
             const dStructId = typeof vac.structure_id === 'object' ? vac.structure_id?.id : vac.structure_id;
             const dJobId = typeof vac.employee_job === 'object' ? vac.employee_job?.id : vac.employee_job;
+            setValue("vacancy_id", vac.id);
             setValue("department_id", dStructId || null);
             setValue("job_id", dJobId || null);
         } else {
+            setValue("vacancy_id", null);
             setValue("department_id", null);
             setValue("job_id", null);
         }
@@ -158,7 +181,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                 if (e.target === e.currentTarget && !isSubmitting) onClose();
             }}
         >
-            <div className="bg-slate-800 dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-700/80">
+            <div className="bg-slate-800 dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-700/80">
                 <div className="px-6 py-5 bg-slate-800 flex items-center justify-between shrink-0">
                     <h3 className="text-xl font-bold text-white flex items-center gap-3">
                         <Paperclip size={20} className="text-teal-400" />
@@ -170,9 +193,10 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                 </div>
                 
                 <form onSubmit={handleSubmit(onSubmit)} className="contents">
+                    <input type="hidden" {...register("vacancy_id")} />
                     <input type="hidden" {...register("department_id")} />
                     <input type="hidden" {...register("job_id")} />
-                    <div className="p-8 bg-white dark:bg-slate-900 overflow-y-visible">
+                    <div className="p-8 bg-white dark:bg-slate-900 overflow-y-auto flex-1 custom-scrollbar">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
                             <div className="absolute inset-y-0 left-1/2 w-px bg-gray-100 dark:bg-slate-800/80 hidden md:block"></div>
                             <div className="space-y-6 flex flex-col pr-2">

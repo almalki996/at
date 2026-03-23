@@ -30,7 +30,7 @@ services:
       ADMIN_PASSWORD: "password"
       ADMIN_TOKEN: "strategic_plans_super_secure_admin_token"
       CORS_ENABLED: "true"
-      CORS_ORIGIN: "https://at.sofoit.pro"
+      CORS_ORIGIN: "https://at.sofoit.pro,http://localhost:3000,http://127.0.0.1:3000"
       CORS_METHODS: "GET,POST,PATCH,DELETE,OPTIONS"
       CORS_ALLOWED_HEADERS: "Content-Type,Authorization"
       PUBLIC_URL: "https://at-api.sofoit.pro"
