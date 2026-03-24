@@ -67,6 +67,15 @@ export function RelationSelect({
     const renderLabel = (opt: any) => {
         const originalData = query?.data?.data?.find((d: any) => d.id === opt.value) as any;
         if (originalData) {
+            if (typeof originalData.vision === "string" && originalData.vision) return originalData.vision;
+            if (originalData.structure_id !== undefined && originalData.employee_job !== undefined) {
+                const structName = typeof originalData.structure_id === 'object' ? originalData.structure_id?.name : '';
+                const jobName = typeof originalData.employee_job === 'object' ? originalData.employee_job?.job_title : '';
+                if (structName || jobName) return `${structName || 'قسم'} - ${jobName || 'وظيفة'}`;
+            }
+            if (originalData.first_name) {
+                return `${originalData.first_name} ${originalData.last_name || ''}`.trim();
+            }
             return originalData.name || originalData.title || originalData.job_title || originalData.العنوان || opt.label || opt.value;
         }
         return opt.label || opt.value;

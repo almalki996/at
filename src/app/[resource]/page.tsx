@@ -133,7 +133,7 @@ export default function GenericList({ params }: { params: Promise<{ resource: st
                                             {getTranslation(field.meta?.translations, field.meta?.display || field.field)}
                                         </th>
                                     ))}
-                                    <th className="px-6 py-4 whitespace-nowrap w-32 justify-end flex">إجراءات</th>
+                                    <th className="px-6 py-4 whitespace-nowrap w-32 text-left">إجراءات</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
@@ -162,7 +162,12 @@ export default function GenericList({ params }: { params: Promise<{ resource: st
                                                 displayVal = val ? new Date(val).toLocaleDateString("ar-SA") : <span className="text-gray-300">-</span>;
                                             } else if (typeof val === "object" && val !== null && !Array.isArray(val)) {
                                                 const v = val as any;
-                                                const relationalName = v.first_name ? `${v.first_name} ${v.last_name || ''}`.trim() : (v.objective_name || v.kpi_name || v.initiative_name || v.mechanism_name || v.vision || v.name || v.title || v.job_title || v.العنوان);
+                                                let relationalName = v.first_name ? `${v.first_name} ${v.last_name || ''}`.trim() : (v.objective_name || v.kpi_name || v.initiative_name || v.mechanism_name || v.vision || v.name || v.title || v.job_title || v.العنوان);
+                                                if (!relationalName && v.structure_id !== undefined && v.employee_job !== undefined) {
+                                                    const structName = typeof v.structure_id === 'object' ? v.structure_id?.name : '';
+                                                    const jobName = typeof v.employee_job === 'object' ? v.employee_job?.job_title : '';
+                                                    if (structName || jobName) relationalName = `${structName || 'قسم'} - ${jobName || 'وظيفة'}`;
+                                                }
                                                 displayVal = <span className="font-bold text-indigo-700 dark:text-indigo-400">
                                                     {relationalName || (v.id ? String(v.id).substring(0,8) + '...' : "مرتبط")}
                                                 </span>;
@@ -177,19 +182,21 @@ export default function GenericList({ params }: { params: Promise<{ resource: st
                                             );
                                         })}
                                         
-                                        <td className="px-6 py-4 whitespace-nowrap flex items-center justify-end gap-2">
-                                            <a 
-                                                href={`/${resourceName}/edit/${record.id}`} 
-                                                className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors border border-transparent hover:border-blue-100 dark:hover:border-blue-800"
-                                            >
-                                                <Edit size={16} />
-                                            </a>
-                                            <button 
-                                                onClick={() => confirmDelete(record.id)}
-                                                className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors border border-transparent hover:border-red-100 dark:hover:border-red-800 cursor-pointer"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <a 
+                                                    href={`/${resourceName}/edit/${record.id}`} 
+                                                    className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors border border-transparent hover:border-blue-100 dark:hover:border-blue-800"
+                                                >
+                                                    <Edit size={16} />
+                                                </a>
+                                                <button 
+                                                    onClick={() => confirmDelete(record.id)}
+                                                    className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors border border-transparent hover:border-red-100 dark:hover:border-red-800 cursor-pointer"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

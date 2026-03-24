@@ -147,7 +147,7 @@ export function GenericForm({ resource, action, id }: { resource: string, action
                                     <div className="w-11 h-6 bg-gray-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                 </label>
                             </div>
-                        ) : field.type === "text" || field.type === "json" ? (
+                        ) : field.type === "text" || field.type === "json" || field.meta?.interface === "input-multiline" || (resource === "implementation_mechanisms" && field.field === "name") ? (
                             <textarea 
                                 {...register(field.field, { required: field.meta?.required })}
                                 className="w-full min-h-[120px] border border-gray-200 dark:border-slate-700/60 bg-gray-50/50 dark:bg-slate-800/80 rounded-xl px-4 py-3 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 dark:focus:border-indigo-500 outline-none transition-all placeholder-gray-400 dark:placeholder-slate-500 font-medium text-gray-900 dark:text-white"

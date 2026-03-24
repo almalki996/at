@@ -27,12 +27,18 @@ Dear Next AI, you **MUST** strictly adhere to these rules (refer to `AGENTS.md` 
 - **UI Consistency:** Use Modern Glassmorphism & Enterprise UI. All data tables must be full-width (`w-full flex-1 overflow-hidden`). Modals must be centered and use `animate-in fade-in`. Use bottom floating action bars (`fixed bottom-10`) for bulk selections.
 - **Headless CMS Engine:** The project uses Directus + Refine.dev. All CRUD actions must use `@refinedev/core` hooks. **NO manual `fetch` or `axios` queries** unless strictly necessary for complex file uploads (like NGINX 1MB bypasses).
 - **Forms & Z-Index:** **NEVER** use native HTML `<select>` inside modals. ALWAYS use `CustomSelect` or `RelationSelect` with portal support to avoid z-index cropping bugs.
+- **ANIMATION CONSISTENCY**: NEVER use sliding animations (`slide-in-from-bottom` etc.) that cause ghosting artifacts or overlapping layout problems in RTL. All custom pages and generic lists MUST use the exact entrance standard: `animate-in fade-in zoom-in-95 duration-500 ease-out` on the outermost wrapping div.
 - **Component Modularity:** Keep files small. Avoid files > 500 lines. Split them into `/tabs` and `/modals` folders per module. DO NOT bloat solitary files.
 
 ---
 
-## 3. The Next Step (Phase 5 - Performance Appraisals / Evaluation)
-You are starting Phase 5. Phase 4 (Strategic Management) has been entirely completed (Plans -> Objectives -> Op Objectives -> KPIs -> Initiatives -> Mechanisms). The `useDirectusSchema` hook was successfully security-patched to securely use `localStorage` JWTs instead of hardcoded tokens.
+## 3. Current Focus (Holistic System Audit) & DELAYED Phase 5
+Phase 4 (Strategic Management) is functionally and visually complete. However, the User has explicitly ordered to **POSTPONE Phase 5 (Performance Management)**. Do NOT start creating Database tables or writing Phase 5 code.
+The current focus of the upcoming sessions is a **Comprehensive System Audit & Enhancement**. This includes, but is not limited to:
+- Reviewing and polishing UI/UX (Mobile responsiveness, tables, color harmonization).
+- Auditing the logic, data flow, and architecture of all previously built sections.
+- Ensuring everything functions optimally and robustly before any new phases.
+Wait for User commands on what specifically to review first.
 
 For Phase 5, you must analyze and discuss the upcoming requirements with the User before writing any code:
 
