@@ -292,7 +292,7 @@ export default function PersonnelPage() {
     }
 
     return (
-        <div className="bg-[#F0F2F5] dark:bg-slate-900 p-2 sm:p-4 lg:p-6 font-tajawal w-full h-[calc(100vh-64px)] overflow-hidden transition-colors flex flex-col animate-in fade-in zoom-in-95 duration-500 ease-out">
+        <div className="bg-[#F0F2F5] dark:bg-slate-900 p-2 sm:p-4 lg:p-6 font-tajawal w-full h-[calc(100vh-64px)] overflow-hidden transition-colors flex flex-col">
             <div className="w-full flex-1 flex flex-col space-y-4">
                 {/* Header Section */}
                 <div className="bg-white dark:bg-slate-800 rounded-xl lg:rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all duration-300 shrink-0">

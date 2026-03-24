@@ -3,7 +3,7 @@
 import React, { use } from "react";
 import { useTable, useDelete, useNavigation } from "@refinedev/core";
 import { useDirectusSchema, getTranslation } from "@/hooks/use-directus-schema";
-import { Plus, Edit, Trash2, Database, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Edit, Trash2, Database, AlertCircle, ChevronLeft, ChevronRight, Flag, Target, Crosshair, TrendingUp, Lightbulb, Wrench } from "lucide-react";
 import StructuresTreePage from "@/components/structures/structures-tree-page";
 
 export default function GenericList({ params }: { params: Promise<{ resource: string }> }) {
@@ -85,15 +85,37 @@ export default function GenericList({ params }: { params: Promise<{ resource: st
 
     const tableHeaders = fields.filter(f => !f.meta?.hidden && !f.schema?.is_primary_key);
 
+    // Dynamic Theming
+    const getResourceTheme = (res: string) => {
+        switch (res.toLowerCase()) {
+            case 'strategic_plans':
+                return { icon: Flag, color: 'from-blue-500 to-blue-700', shadow: 'shadow-blue-600/30', textClass: 'text-blue-500', bgClass: 'from-blue-50/50 dark:from-blue-950/20' };
+            case 'strategic_objectives':
+                return { icon: Target, color: 'from-emerald-500 to-emerald-700', shadow: 'shadow-emerald-600/30', textClass: 'text-emerald-500', bgClass: 'from-emerald-50/50 dark:from-emerald-950/20' };
+            case 'operational_objectives':
+                return { icon: Crosshair, color: 'from-purple-500 to-purple-700', shadow: 'shadow-purple-600/30', textClass: 'text-purple-500', bgClass: 'from-purple-50/50 dark:from-purple-950/20' };
+            case 'kpis':
+                return { icon: TrendingUp, color: 'from-amber-500 to-amber-700', shadow: 'shadow-amber-600/30', textClass: 'text-amber-500', bgClass: 'from-amber-50/50 dark:from-amber-950/20' };
+            case 'initiatives':
+                return { icon: Lightbulb, color: 'from-rose-500 to-rose-700', shadow: 'shadow-rose-600/30', textClass: 'text-rose-500', bgClass: 'from-rose-50/50 dark:from-rose-950/20' };
+            case 'implementation_mechanisms':
+                return { icon: Wrench, color: 'from-cyan-500 to-cyan-700', shadow: 'shadow-cyan-600/30', textClass: 'text-cyan-500', bgClass: 'from-cyan-50/50 dark:from-cyan-950/20' };
+            default:
+                return { icon: Database, color: 'from-indigo-500 to-indigo-700', shadow: 'shadow-indigo-600/30', textClass: 'text-indigo-500', bgClass: 'from-indigo-50/50 dark:from-indigo-950/20' };
+        }
+    };
+    
+    const { icon: ResourceIcon, color: themeColor, shadow: themeShadow, textClass: themeText, bgClass: themeBg } = getResourceTheme(resourceName);
+
     return (
-        <div className="w-full h-full flex flex-col animate-in fade-in zoom-in-95 duration-500 ease-out">
-            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-3xl shadow-lg shadow-indigo-100/30 dark:shadow-none border border-indigo-50 dark:border-slate-800 overflow-hidden transition-colors duration-300">
+        <div className="w-full h-full flex flex-col">
+            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-3xl shadow-xl shadow-indigo-900/5 dark:shadow-none border border-slate-200/60 dark:border-slate-800 overflow-hidden transition-colors duration-300">
                 {/* Header Section */}
-                <div className="bg-gradient-to-l from-indigo-50/50 dark:from-indigo-950/20 to-transparent px-8 py-8 border-b border-gray-100 dark:border-slate-800">
+                <div className={`bg-gradient-to-l ${themeBg} to-transparent px-8 py-8 border-b border-gray-100 dark:border-slate-800`}>
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6">
                         <div className="flex items-center gap-5">
-                            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/30 text-white">
-                                <Database size={32} />
+                            <div className={`w-16 h-16 bg-gradient-to-br ${themeColor} rounded-2xl flex items-center justify-center shadow-lg ${themeShadow} text-white`}>
+                                <ResourceIcon size={32} />
                             </div>
                             <div>
                                 <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight capitalize">{localizedTitle}</h1>
@@ -117,8 +139,8 @@ export default function GenericList({ params }: { params: Promise<{ resource: st
                         </div>
                     ) : records.length === 0 ? (
                         <div className="text-center py-20 px-4">
-                            <div className="w-20 h-20 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100 dark:border-slate-700">
-                                <Database className="text-gray-400 dark:text-slate-500" size={32} />
+                            <div className={`w-20 h-20 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100 dark:border-slate-700 shadow-sm ${themeText}`}>
+                                <ResourceIcon size={32} />
                             </div>
                             <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">لا توجد سجلات</h3>
                             <p className="text-gray-500 dark:text-slate-400 max-w-md mx-auto">لم يتم إضافة أي بيانات لهذا الجدول بعد. انقر على زر إضافة سجل جديد لبدء التعبئة.</p>
@@ -138,8 +160,8 @@ export default function GenericList({ params }: { params: Promise<{ resource: st
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
                                 {records.map((record: any, index: number) => (
-                                    <tr key={record.id} className="hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-colors">
-                                        <td className="px-6 py-4 font-mono text-xs text-gray-400 dark:text-slate-500">{(current - 1) * pageSize + index + 1}</td>
+                                    <tr key={record.id} className="hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 transition-colors group">
+                                    <td className="px-6 py-4 font-mono text-xs text-gray-400 dark:text-slate-500">{(current - 1) * pageSize + index + 1}</td>
                                         
                                         {tableHeaders.map((field) => {
                                             const val = record[field.field];

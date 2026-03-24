@@ -432,7 +432,7 @@ export default function StructuresTreePage() {
     };
 
     return (
-        <div className={`w-full flex flex-col p-4 md:p-6 mx-auto animate-in fade-in zoom-in-95 duration-500 ease-out ${viewMode === 'print' ? 'min-h-screen print:min-h-0 print:p-0 bg-white dark:bg-slate-900 print:bg-white' : 'h-[calc(100vh-5rem)] overflow-hidden'}`}>
+        <div className={`w-full flex flex-col p-4 md:p-6 mx-auto ${viewMode === 'print' ? 'min-h-screen print:min-h-0 print:p-0 bg-white dark:bg-slate-900 print:bg-white' : 'h-[calc(100vh-5rem)] overflow-hidden'}`}>
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 px-6 py-4 mb-5 shrink-0 flex flex-wrap items-center justify-between gap-4 print:hidden">
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">

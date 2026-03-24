@@ -89,7 +89,8 @@ export const SortableTree: React.FC<SortableTreeProps> = ({ items, isExpandedAll
         });
 
         try {
-            const token = process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
+            const rawToken = typeof window !== 'undefined' ? localStorage.getItem("directus_token") : null;
+            const token = rawToken ? rawToken.replace(/['"]+/g, '') : null;
             const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL || "http://127.0.0.1:8055";
             let url = "";
             if (baseUrl.endsWith("/items") || baseUrl.endsWith("/items/")) {
@@ -182,7 +183,8 @@ export const SortableTree: React.FC<SortableTreeProps> = ({ items, isExpandedAll
         const idsToDelete = [...findDescendants(deleteNodeId), deleteNodeId];
 
         try {
-            const token = process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
+            const rawToken = typeof window !== 'undefined' ? localStorage.getItem("directus_token") : null;
+            const token = rawToken ? rawToken.replace(/['"]+/g, '') : null;
             const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL || "http://127.0.0.1:8055";
             let url = "";
             if (baseUrl.endsWith("/items") || baseUrl.endsWith("/items/")) {

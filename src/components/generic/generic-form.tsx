@@ -112,7 +112,7 @@ export function GenericForm({ resource, action, id }: { resource: string, action
                 </span>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-4xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm p-8 rounded-3xl shadow-xl shadow-indigo-100/20 dark:shadow-indigo-900/10 border border-indigo-50/50 dark:border-slate-800 transition-colors mx-auto mt-6 animate-in fade-in zoom-in-95 duration-500 ease-out">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-4xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm p-8 rounded-3xl shadow-xl shadow-indigo-100/20 dark:shadow-indigo-900/10 border border-slate-200/60 dark:border-slate-800 transition-colors mx-auto mt-6">
             <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
                 {action === "create" ? `إضافة سجل جديد (${localizedTitle})` : `تعديل بيانات السجل (${localizedTitle})`}
             </h2>

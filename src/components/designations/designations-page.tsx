@@ -287,7 +287,7 @@ export default function DesignationsPage({ isEmbed = false, defaultProperty = "d
     };
 
     return (
-        <div className={`w-full flex flex-col overflow-hidden rtl animate-in fade-in zoom-in-95 duration-500 ease-out ${isEmbed ? 'flex-1' : 'h-[calc(100vh-5rem)] p-4 md:p-6 mx-auto'}`}>
+        <div className={`w-full flex flex-col overflow-hidden rtl ${isEmbed ? 'flex-1' : 'h-[calc(100vh-5rem)] p-4 md:p-6 mx-auto'}`}>
             {/* Top Toolbar matching legacy UI */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 px-6 py-4 mb-5 shrink-0 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4 flex-1">
