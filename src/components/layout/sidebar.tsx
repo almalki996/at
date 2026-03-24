@@ -124,7 +124,7 @@ export const Sidebar = () => {
             map.set(String(item.id), {
                 key: `dynamic-${item.id}`,
                 label: item.title,
-                route: item.url_path,
+                route: item.url_path ? (item.url_path.startsWith('http') || item.url_path.startsWith('/') ? item.url_path : `/${item.url_path}`) : undefined,
                 sort_order: item.sort_order || 0,
                 icon: item.icon,
                 children: []

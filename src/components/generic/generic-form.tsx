@@ -1,10 +1,13 @@
 import React, { useEffect } from "react";
 import { useForm } from "@refinedev/react-hook-form";
+import { Controller } from "react-hook-form";
 import { useDirectusSchema, DirectusField, getTranslation } from "@/hooks/use-directus-schema";
 import { Save, Ban, AlertCircle, Loader2, ChevronRight, Database, Edit } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { RelationSelect } from "./relation-select";
+import { CustomSelect } from "./custom-select";
+import { DatePickerField } from "./date-picker";
 
 export function GenericForm({ resource, action, id }: { resource: string, action: "create" | "edit", id?: string | number }) {
     const { fields, collectionMeta, isLoading: isSchemaLoading, error: schemaError } = useDirectusSchema(resource);
@@ -138,12 +141,38 @@ export function GenericForm({ resource, action, id }: { resource: string, action
                                 placeholder={`0`}
                             />
                         ) : field.type === "datetime" || field.type === "timestamp" || field.type === "date" ? (
-                            <input 
-                                type={field.type === "date" ? "date" : "datetime-local"}
-                                {...register(field.field, { required: field.meta?.required })}
-                                className="w-full border border-gray-200 dark:border-slate-700/60 bg-gray-50/50 dark:bg-slate-800/80 rounded-xl px-4 py-3 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 dark:focus:border-indigo-500 outline-none transition-all font-medium text-gray-900 dark:text-white"
-                                dir="ltr"
-                            />
+                            <div className="relative z-40">
+                                <DatePickerField
+                                    control={control}
+                                    name={field.field}
+                                    required={!!field.meta?.required}
+                                    placeholder={`اختر ${fieldLabel}`}
+                                    error={!!errors[field.field]}
+                                />
+                            </div>
+                        ) : (field.meta?.interface === "select-dropdown" || field.meta?.options?.choices) ? (
+                            <div className="relative z-[55]">
+                                <Controller
+                                    name={field.field}
+                                    control={control}
+                                    rules={{ required: field.meta?.required }}
+                                    render={({ field: { onChange, value } }) => {
+                                        const choices = (field.meta?.options?.choices as Array<any>) || [];
+                                        const options = choices.map(c => ({
+                                            value: c.value,
+                                            label: String(c.text || c.value)
+                                        }));
+                                        return (
+                                            <CustomSelect
+                                                options={options}
+                                                value={value}
+                                                onChange={onChange}
+                                                placeholder={`اختر ${fieldLabel}`}
+                                            />
+                                        );
+                                    }}
+                                />
+                            </div>
                         ) : (
                             <input 
                                 type="text"

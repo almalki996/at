@@ -387,7 +387,7 @@ export default function PersonnelPage() {
                     
                     {/* Floating Bulk Actions Bar */}
                     {selectedIds.size > 0 && (
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300 pointer-events-none w-full max-w-2xl px-4">
+                        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[9999] animate-in slide-in-from-bottom-5 fade-in duration-300 pointer-events-none w-full max-w-2xl px-4">
                             <div className="bg-slate-900 dark:bg-slate-800 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-2 sm:p-2.5 flex flex-wrap items-center justify-between pointer-events-auto ring-1 ring-white/10 dark:ring-white/5 gap-2">
                                 <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-4 pr-1 sm:pr-2">
                                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold shrink-0">{selectedIds.size}</span>

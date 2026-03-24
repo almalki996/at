@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, Check } from 'lucide-react';
 
 interface CustomSelectProps {
@@ -24,10 +25,32 @@ export const CustomSelect = ({
 }: CustomSelectProps) => {
     const [isOpen, setIsOpen] = React.useState(false);
     const ref = React.useRef<HTMLDivElement>(null);
+    const [rect, setRect] = React.useState<DOMRect | null>(null);
+
+    const updateRect = () => {
+        if (ref.current) {
+            setRect(ref.current.getBoundingClientRect());
+        }
+    };
+
+    React.useEffect(() => {
+        if (isOpen) {
+            updateRect();
+            window.addEventListener('scroll', updateRect, true);
+            window.addEventListener('resize', updateRect);
+        }
+        return () => {
+            window.removeEventListener('scroll', updateRect, true);
+            window.removeEventListener('resize', updateRect);
+        };
+    }, [isOpen]);
     
     React.useEffect(() => {
         const handleClick = (e: MouseEvent) => {
-            if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
+            const target = e.target as Element;
+            if (ref.current && !ref.current.contains(target) && !target.closest('.custom-select-portal')) {
+                setIsOpen(false);
+            }
         };
         document.addEventListener("mousedown", handleClick);
         return () => document.removeEventListener("mousedown", handleClick);
@@ -48,8 +71,16 @@ export const CustomSelect = ({
                 <ChevronDown size={18} className={`text-gray-400 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180 text-teal-500' : ''}`} />
             </button>
             
-            {isOpen && (
-                <div className="absolute z-[60] w-full mt-2 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl shadow-xl max-h-60 overflow-y-auto py-2 custom-scrollbar animate-in fade-in slide-in-from-top-2 focus:outline-none">
+            {isOpen && rect && typeof document !== 'undefined' && createPortal(
+                <div 
+                    className="custom-select-portal fixed z-[9999] bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl shadow-2xl overflow-y-auto py-2 custom-scrollbar animate-in fade-in zoom-in-95 duration-200 focus:outline-none"
+                    style={{
+                        top: `${rect.bottom + 8}px`,
+                        left: `${rect.left}px`,
+                        width: `${rect.width}px`,
+                        maxHeight: '260px'
+                    }}
+                >
                     {options.length === 0 ? (
                         <div className="px-4 py-3 text-sm text-center text-gray-500 dark:text-slate-400">لا توجد خيارات</div>
                     ) : (
@@ -61,7 +92,7 @@ export const CustomSelect = ({
                                     ${value === opt.value 
                                         ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 font-bold' 
                                         : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/50'}`}
-                                onClick={(e) => { e.preventDefault(); onChange(opt.value); setIsOpen(false); }}
+                                onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onChange(opt.value); setIsOpen(false); }}
                             >
                                 <div className="flex-1 truncate text-right">
                                     {renderOption ? renderOption(opt) : opt.label}
@@ -70,7 +101,8 @@ export const CustomSelect = ({
                             </button>
                         ))
                     )}
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

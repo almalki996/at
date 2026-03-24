@@ -145,13 +145,26 @@ export default function GenericList({ params }: { params: Promise<{ resource: st
                                             const val = record[field.field];
                                             let displayVal = val;
                                             
-                                            if (field.type === "boolean") {
+                                            // Handle predefined choices (dropdowns)
+                                            if (field.meta?.interface === "select-dropdown" || field.meta?.options?.choices) {
+                                                const choices = (field.meta?.options?.choices as Array<any>) || [];
+                                                const choice = choices.find(c => String(c.value) === String(val));
+                                                if (choice) {
+                                                    displayVal = (
+                                                        <span className="text-gray-700 dark:text-gray-200 font-bold bg-gray-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm text-xs">
+                                                            {choice.text || val}
+                                                        </span>
+                                                    );
+                                                }
+                                            } else if (field.type === "boolean") {
                                                 displayVal = val ? <span className="text-emerald-500 font-bold bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-md">نعم</span> : <span className="text-rose-500 font-bold bg-rose-50 dark:bg-rose-500/10 px-2.5 py-1 rounded-md">لا</span>;
                                             } else if (field.type === "timestamp" || field.type === "datetime" || field.type === "date") {
                                                 displayVal = val ? new Date(val).toLocaleDateString("ar-SA") : <span className="text-gray-300">-</span>;
                                             } else if (typeof val === "object" && val !== null && !Array.isArray(val)) {
+                                                const v = val as any;
+                                                const relationalName = v.first_name ? `${v.first_name} ${v.last_name || ''}`.trim() : (v.objective_name || v.kpi_name || v.initiative_name || v.mechanism_name || v.vision || v.name || v.title || v.job_title || v.العنوان);
                                                 displayVal = <span className="font-bold text-indigo-700 dark:text-indigo-400">
-                                                    {(val as any).name || (val as any).title || (val as any).job_title || (val as any).العنوان || (val as any).id || "مرتبط"}
+                                                    {relationalName || (v.id ? String(v.id).substring(0,8) + '...' : "مرتبط")}
                                                 </span>;
                                             } else if (Array.isArray(val)) {
                                                 displayVal = <span className="text-gray-400 text-xs px-2 py-1 bg-gray-50 dark:bg-slate-800 rounded-md">مجموعة ({val.length})</span>;
@@ -213,8 +226,8 @@ export default function GenericList({ params }: { params: Promise<{ resource: st
 
             {deleteNodeId && (() => {
                 const recordToDelete = records.find((r: any) => String(r.id) === String(deleteNodeId));
-                // Infer reasonable display property natively relying on basic English or Arabic column names
-                const displayName = recordToDelete?.title || recordToDelete?.name || recordToDelete?.اسم || recordToDelete?.العنوان || `السجل #${deleteNodeId}`;
+                // Infer reasonable display property natively relying on basic English or Arabic column names, plus all phase4 specific names
+                const displayName = recordToDelete?.objective_name || recordToDelete?.kpi_name || recordToDelete?.initiative_name || recordToDelete?.mechanism_name || recordToDelete?.vision || recordToDelete?.title || recordToDelete?.name || recordToDelete?.job_title || recordToDelete?.اسم || recordToDelete?.العنوان || `السجل #${String(deleteNodeId).substring(0,8)}...`;
                 
                 return (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

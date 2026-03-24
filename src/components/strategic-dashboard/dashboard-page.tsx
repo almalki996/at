@@ -106,7 +106,7 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="w-full flex flex-col p-4 md:p-6 mx-auto h-[calc(100vh-5rem)] overflow-y-auto">
+        <div className="w-full flex flex-col p-4 md:p-6 mx-auto pb-16">
             {/* Header section */}
             <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6 lg:p-8 mb-6 shrink-0 relative overflow-hidden transition-colors duration-300">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 dark:bg-indigo-500/5"></div>
