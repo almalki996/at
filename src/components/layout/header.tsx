@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { CalendarDays, Clock, ArrowLeftRight, Sun, Moon } from "lucide-react";
+import { CalendarDays, Clock, ArrowLeftRight, Sun, Moon, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 
-export const Header = () => {
+export const Header = ({ setMobileSidebarOpen }: { setMobileSidebarOpen: React.Dispatch<React.SetStateAction<boolean>> }) => {
     const [siteSettings, setSiteSettings] = useState<{site_name?: string, site_description?: string, logo?: string}>({});
     const [time, setTime] = useState<Date>(new Date());
     const [isHijri, setIsHijri] = useState<boolean>(true);
@@ -21,7 +21,7 @@ export const Header = () => {
         const fetchSettings = async () => {
             try {
                 const u = (process.env.NEXT_PUBLIC_DIRECTUS_URL || "http://127.0.0.1:8055").replace(/\/items\/?$/, '').replace(/\/$/, '');
-                const token = process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
+                const token = typeof window !== "undefined" ? localStorage.getItem("directus_token") : null;
                 const res = await axios.get(`${u}/items/site_settings`, {
                     headers: token ? { Authorization: `Bearer ${token}` } : {}
                 });
@@ -41,7 +41,7 @@ export const Header = () => {
     }, []);
 
     const baseUrlStr = (process.env.NEXT_PUBLIC_DIRECTUS_URL || "http://127.0.0.1:8055").replace(/\/items\/?$/, '').replace(/\/$/, '');
-    const token = process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
+    const token = typeof window !== "undefined" ? localStorage.getItem("directus_token") : null;
 
     const formattedTime = time.toLocaleTimeString("ar-SA", { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const formattedDate = new Intl.DateTimeFormat(isHijri ? "ar-SA-u-ca-islamic" : "ar-SA", { 
@@ -52,9 +52,16 @@ export const Header = () => {
     }).format(time);
 
     return (
-        <header className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 shadow-sm h-20 px-6 flex items-center justify-between sticky top-0 z-10 shrink-0 transition-colors duration-300">
+        <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 shadow-sm h-20 px-6 flex items-center justify-between sticky top-0 z-10 shrink-0 transition-colors duration-300">
             {/* Branding Container */}
             <div className="flex items-center gap-4">
+                <button 
+                    onClick={() => setMobileSidebarOpen(true)}
+                    className="lg:hidden flex items-center justify-center w-11 h-11 text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 transition-colors shadow-sm"
+                    title="فتح القائمة الجانبية"
+                >
+                    <Menu size={22} />
+                </button>
                 <div className="flex flex-col">
                     {siteSettings.site_name && (
                         <h1 className="text-[19px] font-black text-indigo-900 dark:text-indigo-100 tracking-tight">{siteSettings.site_name}</h1>

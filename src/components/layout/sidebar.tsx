@@ -68,7 +68,7 @@ const RecursiveMenuItem = ({ item, level, pathname, isCollapsed }: { item: any; 
     );
 };
 
-export const Sidebar = () => {
+export const Sidebar = ({ mobileSidebarOpen, setMobileSidebarOpen }: { mobileSidebarOpen: boolean, setMobileSidebarOpen: React.Dispatch<React.SetStateAction<boolean>> }) => {
     const pathname = usePathname() || "";
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -76,12 +76,14 @@ export const Sidebar = () => {
         const handleResize = () => {
             if (window.innerWidth < 1024) {
                 setIsCollapsed(true);
+            } else {
+                setMobileSidebarOpen(false); // Close mobile drawer when resizing back to desktop
             }
         };
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    }, [setMobileSidebarOpen]);
 
     const { query } = useList({
         resource: "menu_items",
@@ -99,7 +101,7 @@ export const Sidebar = () => {
         const fetchSettings = async () => {
             try {
                 const u = (process.env.NEXT_PUBLIC_DIRECTUS_URL || "http://127.0.0.1:8055").replace(/\/items\/?$/, '').replace(/\/$/, '');
-                const token = process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
+                const token = typeof window !== "undefined" ? localStorage.getItem("directus_token") : null;
                 const res = await axios.get(`${u}/items/site_settings`, {
                     headers: token ? { Authorization: `Bearer ${token}` } : {}
                 });
@@ -156,23 +158,47 @@ export const Sidebar = () => {
     const baseUrlStr = (process.env.NEXT_PUBLIC_DIRECTUS_URL || "http://127.0.0.1:8055").replace(/\/items\/?$/, '').replace(/\/$/, '');
 
     return (
-        <aside className={`bg-white dark:bg-slate-900 border-l border-gray-200 dark:border-slate-800 h-screen flex flex-col sticky top-0 overflow-y-auto shrink-0 shadow-sm z-20 transition-all duration-300 ${isCollapsed ? 'w-16 sm:w-[75px]' : 'w-64'}`}>
+        <>
+        {/* Mobile Overlay */}
+        {mobileSidebarOpen && (
+            <div 
+                className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+                onClick={() => setMobileSidebarOpen(false)}
+            ></div>
+        )}
+
+        <aside className={`bg-white dark:bg-slate-900 border-l border-gray-200 dark:border-slate-800 h-screen flex flex-col overflow-y-auto shrink-0 shadow-sm z-50 transition-all duration-300 ${
+            // Mobile: fixed layout with translate depending on mobileSidebarOpen
+            // Desktop: sticky layout governed by isCollapsed
+            'fixed right-0 top-0 bottom-0 lg:sticky lg:translate-x-0 ' + 
+            (mobileSidebarOpen ? 'translate-x-0 w-64' : 'translate-x-full lg:w-auto') + ' ' +
+            (!mobileSidebarOpen && isCollapsed ? 'lg:w-[75px]' : (!mobileSidebarOpen && !isCollapsed ? 'lg:w-64' : ''))
+        }`}>
             <div className={`pt-6 pb-4 flex flex-col items-center justify-center border-b border-gray-100 dark:border-slate-800 bg-gray-50/30 dark:bg-slate-900/50 gap-4 relative min-h-[90px] transition-colors duration-300`}>
                 <button 
-                    onClick={() => setIsCollapsed(!isCollapsed)} 
+                    onClick={() => {
+                        if (window.innerWidth < 1024) {
+                            setMobileSidebarOpen(false);
+                        } else {
+                            setIsCollapsed(!isCollapsed);
+                        }
+                    }} 
                     className="absolute top-2 left-2 p-1.5 text-gray-400 dark:text-gray-500 hover:text-indigo-600 dark:hover:text-amber-400 hover:bg-indigo-100 dark:hover:bg-slate-800 rounded-lg transition-colors z-10"
-                    title={isCollapsed ? "توسيع القائمة" : "طي القائمة"}
+                    title={isCollapsed && !mobileSidebarOpen ? "توسيع القائمة" : "طي القائمة"}
                 >
-                    {isCollapsed ? <PanelRightOpen size={18} /> : <PanelRightClose size={18} />}
+                    {isCollapsed && !mobileSidebarOpen ? <PanelRightOpen size={18} /> : <PanelRightClose size={18} />}
                 </button>
                 
-                {siteSettings.logo ? (
-                    <img 
-                        src={`${baseUrlStr}/assets/${siteSettings.logo}?access_token=${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`} 
-                        alt="Site Logo" 
-                        className={`object-contain transition-all duration-300 ${isCollapsed ? 'w-8 h-8 sm:w-10 sm:h-10 drop-shadow-sm rounded-lg mt-2' : 'w-4/5 max-w-[150px] max-h-[100px] drop-shadow-md rounded-2xl'}`} 
-                    />
-                ) : (
+                {siteSettings.logo ? (() => {
+                    const token = typeof window !== "undefined" ? localStorage.getItem("directus_token") : null;
+                    return (
+                        <img 
+                            src={`${baseUrlStr}/assets/${siteSettings.logo}?access_token=${token}`} 
+                            alt="Site Logo" 
+                            className={`object-contain transition-all duration-300 ${isCollapsed ? 'w-8 h-8 sm:w-10 sm:h-10 drop-shadow-sm rounded-lg mt-2' : 'w-4/5 max-w-[150px] max-h-[100px] drop-shadow-md rounded-2xl'}`} 
+                        />
+                    );
+                })() : (
                     <div className={`bg-indigo-50 dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 flex items-center justify-center shadow-inner transition-all duration-300 ${isCollapsed ? 'w-8 h-8 sm:w-10 sm:h-10 rounded-xl mt-2' : 'w-24 h-24 rounded-2xl'}`}>
                         <Menu className="text-indigo-400 dark:text-indigo-500" size={isCollapsed ? 20 : 40} />
                     </div>
@@ -202,12 +228,13 @@ export const Sidebar = () => {
             <div className="p-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50 transition-colors duration-300">
                 <button 
                     onClick={() => logout()}
-                    className={`flex items-center ${isCollapsed ? 'justify-center border border-gray-200 dark:border-slate-700' : 'gap-3 px-4 border border-transparent hover:border-red-100 dark:hover:border-red-900/50'} w-full py-2.5 hover:bg-red-50 dark:hover:bg-red-950/30 text-red-600 dark:text-red-400 rounded-xl transition-colors font-bold shadow-sm`}
+                    className={`flex items-center ${isCollapsed && !mobileSidebarOpen ? 'justify-center border border-gray-200 dark:border-slate-700' : 'gap-3 px-4 border border-transparent hover:border-red-100 dark:hover:border-red-900/50'} w-full py-2.5 hover:bg-red-50 dark:hover:bg-red-950/30 text-red-600 dark:text-red-400 rounded-xl transition-colors font-bold shadow-sm`}
                     title="تسجيل الخروج"
                 >
-                    <LogOut size={20} className="shrink-0" /> {!isCollapsed && "تسجيل الخروج"}
+                    <LogOut size={20} className="shrink-0" /> {!(isCollapsed && !mobileSidebarOpen) && "تسجيل الخروج"}
                 </button>
             </div>
         </aside>
+        </>
     );
 };

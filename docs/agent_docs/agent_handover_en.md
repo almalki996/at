@@ -31,21 +31,20 @@ Dear Next AI, you **MUST** strictly adhere to these rules (refer to `AGENTS.md` 
 
 ---
 
-## 3. The Next Step (Phase 4 - Performance Module)
-You are starting Phase 4 (The Core Business Logic). You must analyze and discuss this with the User before writing any code:
+## 3. The Next Step (Phase 5 - Performance Appraisals / Evaluation)
+You are starting Phase 5. Phase 4 (Strategic Management) has been entirely completed (Plans -> Objectives -> Op Objectives -> KPIs -> Initiatives -> Mechanisms). The `useDirectusSchema` hook was successfully security-patched to securely use `localStorage` JWTs instead of hardcoded tokens.
 
-1. **KPI Database Architecture:**
-   - Determine tables for KPI Library, Employee KPIs, and Evaluation Cycles.
-   - Establish relations (e.g., how KPIs map to specific Vacancies or Cadres).
+For Phase 5, you must analyze and discuss the upcoming requirements with the User before writing any code:
 
-2. **KPI Dictionary / Library Page:**
-   - A screen for HR/Admins to build and classify KPIs and associate them with existing structures and job titles.
+1. **Performance Evaluation Database Architecture:**
+   - Determine tables for Employee Appraisal cycles based on the KPIs they were assigned in Phase 4.
+   - Establish relations (how managers approve or rate the assigned mechanisms and KPIs).
 
-3. **Employee Appraisal Screen:**
+2. **Evaluation Interface:**
    - Allow managers to see their subordinates within the hierarchy (Structure) and evaluate them based on the KPIs assigned to their specific vacancy.
 
-4. **Performance Dashboard:**
-   - High-level progress metrics for the entire organization.
+3. **Performance Dashboard:**
+   - High-level progress metrics and employee scores for the entire organization based on the evaluations.
 
 ---
 

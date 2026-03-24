@@ -86,10 +86,10 @@ export default function GenericList({ params }: { params: Promise<{ resource: st
     const tableHeaders = fields.filter(f => !f.meta?.hidden && !f.schema?.is_primary_key);
 
     return (
-        <div className="w-full h-full">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden transition-colors duration-300">
+        <div className="w-full h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-3xl shadow-lg shadow-indigo-100/30 dark:shadow-none border border-indigo-50 dark:border-slate-800 overflow-hidden transition-colors duration-300">
                 {/* Header Section */}
-                <div className="bg-gradient-to-l from-indigo-50/50 dark:from-indigo-950/20 to-white dark:to-slate-900 px-8 py-8 border-b border-gray-100 dark:border-slate-800">
+                <div className="bg-gradient-to-l from-indigo-50/50 dark:from-indigo-950/20 to-transparent px-8 py-8 border-b border-gray-100 dark:border-slate-800">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6">
                         <div className="flex items-center gap-5">
                             <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/30 text-white">

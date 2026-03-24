@@ -591,7 +591,7 @@ export default function PersonnelPage() {
                                         </tr>
                                     )
                                 })}
-                                {filteredList.length === 0 && (
+                                {filteredList.length === 0 && !personnelQuery.isFetching && (
                                     <tr>
                                         <td colSpan={10} className="px-6 py-16 text-center text-gray-500 dark:text-slate-400">
                                             <div className="flex flex-col items-center gap-3">
@@ -599,6 +599,15 @@ export default function PersonnelPage() {
                                                     <Search size={32} className="text-gray-400" />
                                                 </div>
                                                 <p className="font-bold text-lg">لا توجد نتائج تطابق بحثك</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                                {filteredList.length === 0 && personnelQuery.isFetching && (
+                                    <tr>
+                                        <td colSpan={10} className="px-6 py-16 text-center text-gray-500 dark:text-slate-400">
+                                            <div className="flex flex-col items-center gap-3">
+                                                <div className="w-10 h-10 border-4 border-teal-500/30 border-t-teal-500 rounded-full animate-spin"></div>
                                             </div>
                                         </td>
                                     </tr>
