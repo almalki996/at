@@ -1,8 +1,19 @@
+require('dotenv').config({ path: '.env.local' });
+require('dotenv').config();
+
 const axios = require('axios');
 
 async function patchTranslations() {
-  const token = "strategic_plans_super_secure_admin_token";
-  const url = "http://127.0.0.1:3012";
+  // Read from .env variables automatically
+  const token = process.env.DIRECTUS_ADMIN_TOKEN || process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
+  const url = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL?.replace('/items', '');
+
+  if (!token || !url) {
+    console.error("❌ Error: DIRECTUS_ADMIN_TOKEN or DIRECTUS_URL is missing from your .env file.");
+    process.exit(1);
+  }
+
+  console.log(`🔌 Connecting to Directus at: ${url}`);
   const api = axios.create({
     baseURL: url,
     headers: { Authorization: `Bearer ${token}` }
@@ -17,7 +28,7 @@ async function patchTranslations() {
     { name: 'implementation_mechanisms', title: 'آليات التنفيذ', icon: 'build' }
   ];
 
-  console.log("Patching Collection Metadata...");
+  console.log("\nPatching Collection Metadata...");
   for (const c of collections) {
     try {
       await api.patch(`/collections/${c.name}`, {
