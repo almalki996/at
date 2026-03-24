@@ -70,7 +70,8 @@ export const useDirectusSchema = (collection: string) => {
         const fetchSchema = async () => {
             setIsLoading(true);
             try {
-                const token = process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
+                const sessionToken = typeof window !== "undefined" ? localStorage.getItem("directus_token") : null;
+                const token = sessionToken || process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
                 const baseUrl = (process.env.NEXT_PUBLIC_DIRECTUS_URL || "http://127.0.0.1:8055").replace(/\/items\/?$/, '').replace(/\/$/, '');
                 const [fieldsRes, collectionRes, relationsRes] = await Promise.all([
                     axios.get(`${baseUrl}/fields/${collection}`, {
