@@ -195,12 +195,12 @@ export const Sidebar = ({ mobileSidebarOpen, setMobileSidebarOpen }: { mobileSid
                         <img 
                             src={`${baseUrlStr}/assets/${siteSettings.logo}?access_token=${token}`} 
                             alt="Site Logo" 
-                            className={`object-contain transition-all duration-300 ${isCollapsed ? 'w-8 h-8 sm:w-10 sm:h-10 drop-shadow-sm rounded-lg mt-2' : 'w-4/5 max-w-[150px] max-h-[100px] drop-shadow-md rounded-2xl'}`} 
+                            className={`object-contain transition-all duration-300 ${(isCollapsed && !mobileSidebarOpen) ? 'w-8 h-8 sm:w-10 sm:h-10 drop-shadow-sm rounded-lg mt-2' : 'w-4/5 max-w-[150px] max-h-[100px] drop-shadow-md rounded-2xl'}`} 
                         />
                     );
                 })() : (
-                    <div className={`bg-indigo-50 dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 flex items-center justify-center shadow-inner transition-all duration-300 ${isCollapsed ? 'w-8 h-8 sm:w-10 sm:h-10 rounded-xl mt-2' : 'w-24 h-24 rounded-2xl'}`}>
-                        <Menu className="text-indigo-400 dark:text-indigo-500" size={isCollapsed ? 20 : 40} />
+                    <div className={`bg-indigo-50 dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 flex items-center justify-center shadow-inner transition-all duration-300 ${(isCollapsed && !mobileSidebarOpen) ? 'w-8 h-8 sm:w-10 sm:h-10 rounded-xl mt-2' : 'w-24 h-24 rounded-2xl'}`}>
+                        <Menu className="text-indigo-400 dark:text-indigo-500" size={(isCollapsed && !mobileSidebarOpen) ? 20 : 40} />
                     </div>
                 )}
             </div>
@@ -213,14 +213,14 @@ export const Sidebar = ({ mobileSidebarOpen, setMobileSidebarOpen }: { mobileSid
                         <div className="px-6 py-4 text-sm text-gray-300 font-medium text-center">لا توجد عناصر بعد.</div>
                     ) : (
                         dynamicTree.map((item) => (
-                            <RecursiveMenuItem key={item.key} item={item} level={0} pathname={pathname} isCollapsed={isCollapsed} />
+                            <RecursiveMenuItem key={item.key} item={item} level={0} pathname={pathname} isCollapsed={isCollapsed && !mobileSidebarOpen} />
                         ))
                     )}
                     
-                    <div className="my-3 mx-4 border-t border-gray-100"></div>
+                    <div className="my-3 mx-4 border-t border-gray-100 dark:border-slate-800"></div>
 
                     {refineMenuItems.map((item) => (
-                        <RecursiveMenuItem key={item.key} item={item} level={0} pathname={pathname} isCollapsed={isCollapsed} />
+                        <RecursiveMenuItem key={item.key} item={item} level={0} pathname={pathname} isCollapsed={isCollapsed && !mobileSidebarOpen} />
                     ))}
                 </ul>
             </nav>

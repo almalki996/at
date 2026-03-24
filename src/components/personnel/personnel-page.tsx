@@ -292,8 +292,8 @@ export default function PersonnelPage() {
     }
 
     return (
-        <div className="bg-[#F0F2F5] dark:bg-slate-900 p-2 sm:p-4 lg:p-6 font-tajawal w-full h-[calc(100vh-64px)] overflow-hidden transition-colors duration-300 flex flex-col">
-            <div className="w-full flex-1 flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="bg-[#F0F2F5] dark:bg-slate-900 p-2 sm:p-4 lg:p-6 font-tajawal w-full h-[calc(100vh-64px)] overflow-hidden transition-colors flex flex-col animate-in fade-in zoom-in-95 duration-500 ease-out">
+            <div className="w-full flex-1 flex flex-col space-y-4">
                 {/* Header Section */}
                 <div className="bg-white dark:bg-slate-800 rounded-xl lg:rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all duration-300 shrink-0">
                     <div className="flex items-center gap-4">
@@ -387,7 +387,7 @@ export default function PersonnelPage() {
                     
                     {/* Floating Bulk Actions Bar */}
                     {selectedIds.size > 0 && (
-                        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[9999] animate-in slide-in-from-bottom-5 fade-in duration-300 pointer-events-none w-full max-w-2xl px-4">
+                        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[9999] animate-in fade-in zoom-in-95 duration-500 ease-out pointer-events-none w-full max-w-2xl px-4">
                             <div className="bg-slate-900 dark:bg-slate-800 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-2 sm:p-2.5 flex flex-wrap items-center justify-between pointer-events-auto ring-1 ring-white/10 dark:ring-white/5 gap-2">
                                 <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-4 pr-1 sm:pr-2">
                                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold shrink-0">{selectedIds.size}</span>

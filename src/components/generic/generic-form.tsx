@@ -30,11 +30,25 @@ export function GenericForm({ resource, action, id }: { resource: string, action
                 description: "تم حفظ البيانات واعتمادها داخل قاعدة البيانات بشكل آمن ومستقر.",
                 type: "success"
             }),
-            errorNotification: () => ({
-                message: "تعذر حفظ التعديلات السابقة",
-                description: "رجاءً تأكد من تعبئة كافة الحقول الإلزامية أو تحقق من اتصالك بالشبكة.",
-                type: "error"
-            })
+            errorNotification: (err: any) => {
+                const apiError = err?.response?.data?.errors?.[0]?.message || err?.message || "";
+                let desc = "رجاءً تأكد من تعبئة كافة الحقول الإلزامية أو تحقق من اتصالك بالشبكة.";
+
+                if (apiError) {
+                    desc = `تفاصيل الخطأ: ${apiError}`;
+                    if (apiError.toLowerCase().includes("unique")) desc = `هذه البيانات مسجلة مسبقاً ولا يمكن تكرارها - التفاصيل: ${apiError}`;
+                    else if (apiError.toLowerCase().includes("null") || apiError.toLowerCase().includes("required")) desc = `هناك حقل إلزامي مخفي لم يتم إرساله - التفاصيل: ${apiError}`;
+                    else if (apiError.toLowerCase().includes("foreign") || apiError.toLowerCase().includes("relation")) desc = `البيانات المرتبطة غير صحيحة - التفاصيل: ${apiError}`;
+                    else if (apiError.toLowerCase().includes("integer") || apiError.toLowerCase().includes("number")) desc = `أحد الحقول يتطلب رقماً صحيحاً ولكن تم إرسال نص - التفاصيل: ${apiError}`;
+                    else if (apiError.toLowerCase().includes("permission") || apiError.toLowerCase().includes("forbidden")) desc = `ليس لديك صلاحية الحفظ في هذا الجدول - التفاصيل: ${apiError}`;
+                }
+
+                return {
+                    message: "تعذر حفظ التعديلات",
+                    description: desc,
+                    type: "error"
+                };
+            }
         }
     });
 
@@ -47,6 +61,13 @@ export function GenericForm({ resource, action, id }: { resource: string, action
     const router = useRouter();
 
     const onSubmit = async (data: Record<string, unknown>) => {
+        if (action === "create") {
+            // Auto-generate UUID if the database schema is missing a default value
+            const pkField = fields.find((f: DirectusField) => f.schema?.is_primary_key);
+            if (pkField && pkField.type === "uuid" && !data[pkField.field]) {
+                data[pkField.field] = crypto.randomUUID();
+            }
+        }
         await onFinish(data);
         router.push(`/${resource}`);
     };
@@ -91,7 +112,7 @@ export function GenericForm({ resource, action, id }: { resource: string, action
                 </span>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-4xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm p-8 rounded-3xl shadow-xl shadow-indigo-100/20 dark:shadow-indigo-900/10 border border-indigo-50/50 dark:border-slate-800 transition-colors mx-auto mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-4xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm p-8 rounded-3xl shadow-xl shadow-indigo-100/20 dark:shadow-indigo-900/10 border border-indigo-50/50 dark:border-slate-800 transition-colors mx-auto mt-6 animate-in fade-in zoom-in-95 duration-500 ease-out">
             <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
                 {action === "create" ? `إضافة سجل جديد (${localizedTitle})` : `تعديل بيانات السجل (${localizedTitle})`}
             </h2>

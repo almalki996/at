@@ -287,7 +287,7 @@ export default function DesignationsPage({ isEmbed = false, defaultProperty = "d
     };
 
     return (
-        <div className={`w-full flex flex-col overflow-hidden rtl ${isEmbed ? 'flex-1' : 'h-[calc(100vh-5rem)] p-4 md:p-6 mx-auto'}`}>
+        <div className={`w-full flex flex-col overflow-hidden rtl animate-in fade-in zoom-in-95 duration-500 ease-out ${isEmbed ? 'flex-1' : 'h-[calc(100vh-5rem)] p-4 md:p-6 mx-auto'}`}>
             {/* Top Toolbar matching legacy UI */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 px-6 py-4 mb-5 shrink-0 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4 flex-1">
@@ -558,12 +558,12 @@ export default function DesignationsPage({ isEmbed = false, defaultProperty = "d
                                     />
                                 </div>
                                 
-                                <div className="flex gap-6">
-                                    <div className="flex items-center gap-3 bg-gray-50 dark:bg-slate-800/50 p-4 rounded-xl border-2 border-gray-100 dark:border-slate-700 flex-1">
-                                        <label className="text-sm font-bold text-gray-700 dark:text-gray-300 shrink-0">حالة التفعيل</label>
+                                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                                    <div className="flex items-center justify-between sm:justify-start gap-4 bg-gray-50 dark:bg-slate-800/50 px-5 py-4 rounded-xl border-2 border-gray-100 dark:border-slate-700 shrink-0">
+                                        <label className="text-sm font-bold text-gray-700 dark:text-gray-300">حالة التفعيل</label>
                                         <button 
                                             type="button" 
-                                            className={`w-12 h-6 rounded-full transition-colors relative mr-auto ${formData.is_active ? 'bg-teal-500' : 'bg-gray-300 dark:bg-slate-600'}`}
+                                            className={`w-12 h-6 rounded-full transition-colors relative mr-auto sm:mr-4 ${formData.is_active ? 'bg-teal-500' : 'bg-gray-300 dark:bg-slate-600'}`}
                                             onClick={() => setFormData({...formData, is_active: !formData.is_active})}
                                         >
                                             <div className={`shadow-sm w-4 h-4 bg-white rounded-full absolute top-1 transition-all flex items-center justify-center ${formData.is_active ? 'right-7 border-teal-200' : 'right-1'}`}>
@@ -571,11 +571,11 @@ export default function DesignationsPage({ isEmbed = false, defaultProperty = "d
                                         </button>
                                     </div>
                                     
-                                    <div className="flex items-center gap-3 bg-gray-50 dark:bg-slate-800/50 p-4 rounded-xl border-2 border-gray-100 dark:border-slate-700 flex-1">
+                                    <div className="flex items-center gap-3 bg-gray-50 dark:bg-slate-800/50 p-3 sm:p-4 rounded-xl border-2 border-gray-100 dark:border-slate-700 flex-1">
                                         <label className="text-sm font-bold text-gray-700 dark:text-gray-300 shrink-0">ترتيب العرض</label>
                                         <input 
                                             type="number" 
-                                            className="w-full px-2 py-1.5 text-center text-gray-900 dark:text-white bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-600 rounded-lg outline-none font-mono focus:border-teal-500 transition-colors"
+                                            className="w-full px-2 py-2 text-center text-gray-900 dark:text-white bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-600 rounded-lg outline-none font-mono focus:border-teal-500 transition-colors"
                                             value={formData.sort_order || 0}
                                             onChange={(e) => setFormData({...formData, sort_order: parseInt(e.target.value) || 0})}
                                             min="0"
@@ -586,12 +586,12 @@ export default function DesignationsPage({ isEmbed = false, defaultProperty = "d
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="bg-gray-50/80 dark:bg-slate-950/50 px-8 py-5 border-t border-gray-100 dark:border-slate-800 flex justify-between items-center rounded-b-3xl">
-                            <div className="flex gap-3">
+                        <div className="bg-gray-50/80 dark:bg-slate-950/50 px-6 sm:px-8 py-5 border-t border-gray-100 dark:border-slate-800 flex flex-col-reverse sm:flex-row sm:justify-between items-stretch sm:items-center gap-4 rounded-b-3xl">
+                            <div className="flex gap-3 w-full sm:w-auto">
                                 <button 
                                     onClick={handleSave}
                                     disabled={isSubmitting || !formData.name?.trim()}
-                                    className="flex items-center gap-2 px-6 py-2.5 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl transition-colors shadow-lg shadow-teal-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
+                                    className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-6 py-3 sm:py-2.5 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl transition-colors shadow-lg shadow-teal-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     {isSubmitting ? (
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -603,18 +603,18 @@ export default function DesignationsPage({ isEmbed = false, defaultProperty = "d
                                 <button 
                                     onClick={() => setIsModalOpen(false)}
                                     disabled={isSubmitting}
-                                    className="flex items-center gap-2 px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-rose-600/20 disabled:opacity-70"
+                                    className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-6 py-3 sm:py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-rose-600/20 disabled:opacity-70"
                                 >
                                     إغلاق
                                 </button>
                             </div>
 
                             <div 
-                                className="flex items-center gap-3 cursor-pointer text-sm font-bold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 px-4 py-2.5 border-2 border-gray-200 dark:border-slate-700 rounded-xl hover:border-teal-500 transition-colors select-none"
+                                className="flex items-center justify-between sm:justify-start gap-4 cursor-pointer text-sm font-bold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 px-5 py-3 sm:py-2.5 border-2 border-gray-200 dark:border-slate-700 rounded-xl hover:border-teal-500 transition-colors select-none w-full sm:w-auto"
                                 onClick={() => setKeepOpen(!keepOpen)}
                             >
-                                ابقاء النافذة مفتوحة
-                                <div className={`w-10 h-5 rounded-full transition-colors relative ${keepOpen ? 'bg-teal-500' : 'bg-gray-300 dark:bg-slate-700'}`}>
+                                <span className="whitespace-nowrap">ابقاء النافذة مفتوحة</span>
+                                <div className={`w-10 h-5 rounded-full transition-colors relative shrink-0 ${keepOpen ? 'bg-teal-500' : 'bg-gray-300 dark:bg-slate-700'}`}>
                                     <div className={`shadow-sm w-3.5 h-3.5 bg-white rounded-full absolute top-[3px] transition-all flex items-center justify-center ${keepOpen ? 'right-[22px]' : 'right-1'}`}>
                                     </div>
                                 </div>

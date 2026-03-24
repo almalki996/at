@@ -386,7 +386,7 @@ export default function DepartmentsPage() {
     };
 
     return (
-        <div className="p-6 max-w-[1600px] mx-auto space-y-6">
+        <div className="p-6 max-w-[1600px] mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-500 ease-out">
             {/* Header */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-6 flex flex-col md:flex-row justify-between items-center gap-4 transition-colors duration-200 relative z-20">
                 
