@@ -1,4 +1,5 @@
 import dataProvider from "@refinedev/simple-rest";
+import { DataProvider } from "@refinedev/core";
 import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || "http://localhost:8055/items";
@@ -122,7 +123,7 @@ axiosInstance.interceptors.response.use(
 
 const baseProvider = dataProvider(API_URL, axiosInstance);
 
-export const directusDataProvider = {
+export const directusDataProvider: DataProvider = {
     ...baseProvider,
     
     getList: async (params: any) => {
