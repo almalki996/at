@@ -85,11 +85,11 @@ export default function PersonnelPage() {
     const refetch = personnelQuery.refetch;
     const data = personnelQuery.data;
 
-    const { query: structuresQuery } = useList({ resource: "Structures", pagination: { pageSize: 500 } });
-    const { query: jobsQuery } = useList({ resource: "Employees", pagination: { pageSize: 500 } });
-    const { query: departmentsQuery } = useList({ resource: "Departments", pagination: { pageSize: 500 } });
-    const { query: assignmentsQuery } = useList({ resource: "Employee_Assignments", pagination: { pageSize: 500 } });
-    const { query: qualificationsQuery } = useList({ resource: "Employee_Qualifications", pagination: { pageSize: 500 } });
+    const { query: structuresQuery } = useList({ resource: "Structures", pagination: { pageSize: 500 }, meta: { fields: ['*', 'parent_id.*'] } });
+    const { query: jobsQuery } = useList({ resource: "Employees", pagination: { pageSize: 500 }, meta: { fields: ['*'] } });
+    const { query: departmentsQuery } = useList({ resource: "Departments", pagination: { pageSize: 500 }, meta: { fields: ['*', 'parent_id.*'] } });
+    const { query: assignmentsQuery } = useList({ resource: "Employee_Assignments", pagination: { pageSize: 500 }, meta: { fields: ['*'] } });
+    const { query: qualificationsQuery } = useList({ resource: "Employee_Qualifications", pagination: { pageSize: 500 }, meta: { fields: ['*'] } });
 
     const structuresData = structuresQuery.data;
     const jobsData = jobsQuery.data;

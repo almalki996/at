@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# نظام أداء (Ada'a System)
 
-## Getting Started
+نظام إلكتروني حديث ومتكامل مبني لإدارة الموارد البشرية، التخطيط الهيكلي، وإدارة الأداء الاستراتيجي. يعتمد النظام على معمارية (Headless CMS) باستخدام [Directus](https://directus.io) كقاعدة بيانات وخلفية (Backend)، و [Refine.dev](https://refine.dev) مع [Next.js](https://nextjs.org) للواجهة الأمامية (Frontend).
 
-First, run the development server:
+## 🚀 محتويات النظام (المراحل المنجزة)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. **دليل الوظائف (Jobs Directory):** إدارة الكوادر، أنواع الوظائف، المحاور، والمسميات الوظيفية.
+2. **المناصب والشواغر (Vacancy Planning):** إدارة الهياكل التنظيمية وتخطيط المقاعد الشاغرة والمشغولة.
+3. **سجل الموظفين (Personnel):** إدارة بيانات الموظفين وربطهم ديناميكياً بالشواغر الوظيفية.
+4. **الإدارة الاستراتيجية (Strategic Cascade):** إدارة الخطط الاستراتيجية، الأهداف التشغيلية، مؤشرات الأداء (KPIs)، المبادرات، وآليات التنفيذ مع لوحة تحكم بانورامية متكاملة.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ التقنيات المستخدمة (Tech Stack)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **إطار العمل الأساسي:** [Next.js 15 (App Router)](https://nextjs.org/)
+- **إطار إدارة لوحات التحكم:** [Refine.dev](https://refine.dev/)
+- **قاعدة البيانات وواجهة برمجة التطبيقات:** [Directus](https://directus.io/)
+- **التصميم وتنسيق الواجهات:** [Tailwind CSS 4](https://tailwindcss.com/) + Glassmorphism UI
+- **الأيقونات:** [Lucide React](https://lucide.dev/)
+- **مكونات إضافية:** `react-datepicker` (للتقويم العربي/الهجري)، `react-hot-toast` (للإشعارات).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔒 بنية الأمان ومصادقة المستخدمين
 
-## Learn More
+يستخدم النظام بيئة **Zero-Trust Security** في الواجهة الأمامية:
+- لا توجد مفاتيح (Tokens) حساسة مخزنة في بيئة الواجهة الأمامية (فقط عبر جلسة المستخدم `localStorage`).
+- يتم تطبيق سياسات الصلاحيات (RBAC) بشكل لحظي ومباشر من قاعدة بيانات Directus (يعود بخطأ 403 Forbidden في حال عدم امتلاك المستخدم للصلاحية).
+- يتم إدارة جلب البيانات المترابطة (Hydration) بشكل ديناميكي من خلال اعتراض طلبات Axios `fields=*.*,*`.
 
-To learn more about Next.js, take a look at the following resources:
+## 📦 خطوات التشغيل في بيئة التطوير المحلية (Development)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **تثبيت الحزم:**
+   ```bash
+   pnpm install
+   ```
+2. **إعداد المتغيرات البيئية:**
+   قم بإنشاء أو تعديل ملف `.env` ووضع الروابط والمفاتيح الخاصة بقاعدة البيانات Directus:
+   ```env
+   DIRECTUS_URL=https://your-directus-api-url
+   NEXT_PUBLIC_DIRECTUS_URL=https://your-directus-api-url/items
+   DIRECTUS_ADMIN_TOKEN=your_secure_admin_token_for_scripts
+   ```
+3. **تشغيل الخادم:**
+   ```bash
+   pnpm dev
+   ```
+   سيتم تشغيل المشروع على الرابط `http://localhost:3000`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📚 التوثيق المتقدم
 
-## Deploy on Vercel
+للاطلاع على معمارية المشروع وقواعد التطوير للمهندسين والوكلاء الاصطناعيين، يرجى مراجعة الملفات التالية:
+- `AGENTS.md`: القواعد الصارمة لبناء الشاشات والتصميم.
+- `docs/agent_docs/`: ملاحظات المهندسين الفنية وطرق الربط مع Directus.
+- `docs/user_docs/`: أدلة استخدام النظام واستعراض المشاكل وحلولها.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+*تم بناء هذا التطبيق لتقديم تجربة مستخدم استثنائية (Premium UI/UX) وتوسيع قدرات المؤسسات في التحول الرقمي.*

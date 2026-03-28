@@ -13,12 +13,15 @@ axiosInstance.interceptors.request.use((config) => {
         config.headers.Authorization = `Bearer ${finalToken}`;
     }
     
-    // Auto-append wildcard relational fields for all GET queries to Directus, 
-    // ensuring Refine tables receive populated objects (e.g. employee names) instead of raw IDs
+    // Modern Best Practice: Read exact queried fields from dynamic headers set by Data Provider OR default to a very safe 1st-level wildcard
     if (config.method === 'get' && config.url && !config.url.includes('/auth/')) {
         config.params = config.params || {};
-        if (!config.params.fields) {
-            config.params.fields = '*.*.*,*'; // Directus syntax: Fetch all root fields and up to 2nd-level relational data
+        
+        if (config.headers && config.headers['X-Directus-Fields']) {
+            config.params.fields = config.headers['X-Directus-Fields'];
+            delete config.headers['X-Directus-Fields']; // Cleanup before sending
+        } else if (!config.params.fields) {
+            config.params.fields = '*'; // Safest fallback: Only root level
         }
     }
     
@@ -121,6 +124,55 @@ const baseProvider = dataProvider(API_URL, axiosInstance);
 
 export const directusDataProvider = {
     ...baseProvider,
+    
+    getList: async (params: any) => {
+        const { meta } = params;
+        const mappedParams = { ...params };
+        
+        if (meta?.fields) {
+            mappedParams.meta = {
+                ...meta,
+                headers: {
+                    ...meta.headers,
+                    'X-Directus-Fields': Array.isArray(meta.fields) ? meta.fields.join(',') : meta.fields
+                }
+            };
+        }
+        return baseProvider.getList(mappedParams);
+    },
+    
+    getMany: async (params: any) => {
+        const { meta } = params;
+        const mappedParams = { ...params };
+        
+        if (meta?.fields) {
+            mappedParams.meta = {
+                ...meta,
+                headers: {
+                    ...meta.headers,
+                    'X-Directus-Fields': Array.isArray(meta.fields) ? meta.fields.join(',') : meta.fields
+                }
+            };
+        }
+        return baseProvider.getMany(mappedParams);
+    },
+    
+    getOne: async (params: any) => {
+        const { meta } = params;
+        const mappedParams = { ...params };
+        
+        if (meta?.fields) {
+            mappedParams.meta = {
+                ...meta,
+                headers: {
+                    ...meta.headers,
+                    'X-Directus-Fields': Array.isArray(meta.fields) ? meta.fields.join(',') : meta.fields
+                }
+            };
+        }
+        return baseProvider.getOne(mappedParams);
+    },
+
     deleteMany: async ({ resource, ids, variables, meta }: any) => {
         const response = await axiosInstance.delete(`/${resource}`, {
             baseURL: API_URL,
